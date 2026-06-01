@@ -1,0 +1,533 @@
+config:
+  validation: true
+  warningsAsErrors: false
+  checkExhaustiveness: false
+  excludes: []
+
+processors:
+  active: true
+
+console-reports:
+  active: true
+  exclude:
+    - 'ProjectStatisticsReport'
+    - 'ComplexityReport'
+    - 'NotificationReport'
+
+# ---------------------------------------------------------------------------
+# COMMENTS
+# ---------------------------------------------------------------------------
+comments:
+  active: true
+  AbsentOrWrongFileLicense:
+    active: false
+  DeprecatedBlockTag:
+    active: false
+  DocumentationOverPrivateFunction:
+    active: false
+  DocumentationOverPrivateProperty:
+    active: false
+  EndOfSentenceFormat:
+    active: false
+  UndocumentedPublicClass:
+    active: false
+    excludes: ['**/test/**', '**/androidTest/**', '**/preview/**']
+  UndocumentedPublicFunction:
+    active: false
+    excludes: ['**/test/**', '**/androidTest/**', '**/preview/**']
+  UndocumentedPublicProperty:
+    active: false
+    excludes: ['**/test/**', '**/androidTest/**', '**/preview/**']
+
+# ---------------------------------------------------------------------------
+# COMPLEXITY
+# ---------------------------------------------------------------------------
+complexity:
+  active: true
+  CognitiveComplexMethod:
+    active: true
+    allowedComplexity: 20
+  ComplexCondition:
+    active: true
+    allowedConditions: 4
+  CyclomaticComplexMethod:
+    active: true
+    # Composable with many branches (LaunchedEffect, when-states) needs more room
+    allowedComplexity: 20
+    ignoreSingleWhenExpression: true
+    ignoreSimpleWhenEntries: true
+    ignoreNestingFunctions: true
+    nestingFunctions:
+      - 'also'
+      - 'apply'
+      - 'forEach'
+      - 'let'
+      - 'run'
+      - 'use'
+      - 'with'
+      - 'animate'
+      - 'animateAsState'
+      - 'composable'
+  LargeClass:
+    active: true
+    # ViewModel + Screen file can be large; bump limit slightly
+    allowedLines: 700
+  LongMethod:
+    active: true
+    # Composable functions are inherently longer than regular functions
+    allowedLines: 100
+    excludes: ['**/ui/**', '**/screen/**', '**/composable/**']
+  LongParameterList:
+    active: true
+    # Composable functions commonly have: modifier, state, multiple callbacks
+    allowedFunctionParameters: 8
+    allowedConstructorParameters: 6
+    ignoreDefaultParameters: true
+    ignoreDataClasses: true
+    ignoreAnnotatedParameter: ['Composable']
+  NestedBlockDepth:
+    active: true
+    allowedDepth: 5
+  TooManyFunctions:
+    active: true
+    excludes: ['**/test/**', '**/androidTest/**', '**/preview/**']
+    # UI files have many small composables + previews
+    allowedFunctionsPerFile: 20
+    allowedFunctionsPerClass: 15
+    allowedFunctionsPerInterface: 11
+    allowedFunctionsPerObject: 11
+    allowedFunctionsPerEnum: 11
+    ignoreDeprecated: false
+    ignorePrivate: false
+    ignoreInternal: false
+    ignoreOverridden: true
+    ignoreAnnotatedFunctions: ['Composable', 'Preview']
+  StringLiteralDuplication:
+    active: false
+  MethodOverloading:
+    active: false
+
+# ---------------------------------------------------------------------------
+# COROUTINES
+# ---------------------------------------------------------------------------
+coroutines:
+  active: true
+  GlobalCoroutineUsage:
+    active: true
+  InjectDispatcher:
+    active: true
+    dispatcherNames:
+      - 'IO'
+      - 'Default'
+      - 'Unconfined'
+  RedundantSuspendModifier:
+    active: true
+  SleepInsteadOfDelay:
+    active: true
+  SuspendFunWithFlowReturnType:
+    active: true
+
+# ---------------------------------------------------------------------------
+# EMPTY BLOCKS
+# ---------------------------------------------------------------------------
+empty-blocks:
+  active: true
+  EmptyCatchBlock:
+    active: true
+    allowedExceptionNameRegex: '_|(ignore|expected).*'
+  EmptyClassBlock:
+    active: true
+  EmptyDefaultConstructor:
+    active: true
+  EmptyDoWhileBlock:
+    active: true
+  EmptyElseBlock:
+    active: true
+  EmptyFinallyBlock:
+    active: true
+  EmptyForBlock:
+    active: true
+  EmptyFunctionBlock:
+    active: true
+    ignoreOverridden: true
+  EmptyIfBlock:
+    active: true
+  EmptyInitBlock:
+    active: true
+  EmptyKotlinFile:
+    active: true
+  EmptySecondaryConstructor:
+    active: true
+  EmptyTryBlock:
+    active: true
+  EmptyWhenBlock:
+    active: true
+  EmptyWhileBlock:
+    active: true
+
+# ---------------------------------------------------------------------------
+# EXCEPTIONS
+# ---------------------------------------------------------------------------
+exceptions:
+  active: true
+  ExceptionRaisedInUnexpectedLocation:
+    active: true
+    methodNames:
+      - 'equals'
+      - 'finalize'
+      - 'hashCode'
+      - 'toString'
+  InstanceOfCheckForException:
+    active: true
+    excludes: ['**/test/**', '**/androidTest/**']
+  PrintStackTrace:
+    active: true
+  RethrowCaughtException:
+    active: true
+  ReturnFromFinally:
+    active: true
+  SwallowedException:
+    active: true
+    ignoredExceptionTypes:
+      - 'InterruptedException'
+      - 'MalformedURLException'
+      - 'NumberFormatException'
+      - 'ParseException'
+    allowedExceptionNameRegex: '_|(ignore|expected).*'
+  ThrowingExceptionFromFinally:
+    active: true
+  ThrowingExceptionsWithoutMessageOrCause:
+    active: true
+    excludes: ['**/test/**', '**/androidTest/**']
+    exceptions:
+      - 'ArrayIndexOutOfBoundsException'
+      - 'Exception'
+      - 'IllegalArgumentException'
+      - 'IllegalStateException'
+      - 'IndexOutOfBoundsException'
+      - 'NullPointerException'
+      - 'RuntimeException'
+      - 'Throwable'
+  ThrowingNewInstanceOfSameException:
+    active: true
+  TooGenericExceptionCaught:
+    active: true
+    excludes: ['**/test/**', '**/androidTest/**']
+    exceptionNames:
+      - 'Error'
+      - 'Exception'
+      - 'IllegalMonitorStateException'
+      - 'NullPointerException'
+      - 'RuntimeException'
+      - 'Throwable'
+    allowedExceptionNameRegex: '_|(ignore|expected).*'
+  TooGenericExceptionThrown:
+    active: true
+    exceptionNames:
+      - 'Error'
+      - 'Exception'
+      - 'RuntimeException'
+      - 'Throwable'
+
+# ---------------------------------------------------------------------------
+# NAMING
+# ---------------------------------------------------------------------------
+naming:
+  active: true
+  ClassNaming:
+    active: true
+    classPattern: '[A-Z][a-zA-Z0-9]*'
+  ConstructorParameterNaming:
+    active: true
+    parameterPattern: '[a-z][A-Za-z0-9]*'
+    privateParameterPattern: '[a-z][A-Za-z0-9]*'
+    excludeClassPattern: '$^'
+  EnumNaming:
+    active: true
+    enumEntryPattern: '[A-Z][_a-zA-Z0-9]*'
+  FunctionNaming:
+    active: true
+    excludes: ['**/test/**', '**/androidTest/**']
+    # KEY: allow PascalCase for @Composable functions (e.g. UserCard, HomeScreen)
+    # Regular functions: camelCase | Composable functions: PascalCase
+    functionPattern: '[a-zA-Z][a-zA-Z0-9]*'
+    excludeClassPattern: '$^'
+  FunctionParameterNaming:
+    active: true
+    parameterPattern: '[a-z][A-Za-z0-9]*'
+    excludeClassPattern: '$^'
+  InvalidPackageDeclaration:
+    active: true
+    rootPackage: ''
+    requireRootInDeclaration: false
+  MatchingDeclarationName:
+    active: true
+    mustBeFirst: true
+  MemberNameEqualsClassName:
+    active: true
+    ignoreOverridden: true
+  NoNameShadowing:
+    active: true
+  ObjectPropertyNaming:
+    active: true
+    constantPattern: '[A-Za-z][_A-Za-z0-9]*'
+    propertyPattern: '[A-Za-z][_A-Za-z0-9]*'
+    privatePropertyPattern: '(_)?[A-Za-z][_A-Za-z0-9]*'
+  PackageNaming:
+    active: true
+    packagePattern: '[a-z]+(\.[a-z][A-Za-z0-9]*)*'
+  TopLevelPropertyNaming:
+    active: true
+    constantPattern: '[A-Z][_A-Z0-9]*'
+    propertyPattern: '[A-Za-z][_A-Za-z0-9]*'
+    privatePropertyPattern: '_?[A-Za-z][_A-Za-z0-9]*'
+  VariableNaming:
+    active: true
+    variablePattern: '[a-z][A-Za-z0-9]*'
+    privateVariablePattern: '(_)?[a-z][A-Za-z0-9]*'
+    excludeClassPattern: '$^'
+
+# ---------------------------------------------------------------------------
+# PERFORMANCE
+# ---------------------------------------------------------------------------
+performance:
+  active: true
+  ArrayPrimitive:
+    active: true
+  ForEachOnRange:
+    active: true
+    excludes: ['**/test/**', '**/androidTest/**']
+  SpreadOperator:
+    active: true
+    excludes: ['**/test/**', '**/androidTest/**']
+  UnnecessaryTemporaryInstantiation:
+    active: true
+
+# ---------------------------------------------------------------------------
+# POTENTIAL BUGS
+# ---------------------------------------------------------------------------
+potential-bugs:
+  active: true
+  AvoidReferentialEquality:
+    active: true
+    forbiddenTypePatterns:
+      - 'kotlin.String'
+  DoubleMutabilityForCollection:
+    active: true
+    mutableTypes:
+      - 'kotlin.collections.MutableList'
+      - 'kotlin.collections.MutableMap'
+      - 'kotlin.collections.MutableSet'
+      - 'java.util.ArrayList'
+      - 'java.util.LinkedHashSet'
+      - 'java.util.HashSet'
+      - 'java.util.LinkedHashMap'
+      - 'java.util.HashMap'
+  EqualsAlwaysReturnsTrueOrFalse:
+    active: true
+  EqualsWithHashCodeExist:
+    active: true
+  ExplicitGarbageCollectionCall:
+    active: true
+  HasPlatformType:
+    active: true
+  IgnoredReturnValue:
+    active: true
+    restrictToConfig: true
+    returnValueAnnotations:
+      - 'CheckResult'
+      - '*.CheckResult'
+      - 'CheckReturnValue'
+      - '*.CheckReturnValue'
+    ignoreReturnValueAnnotations:
+      - 'CanIgnoreReturnValue'
+      - '*.CanIgnoreReturnValue'
+    returnValueTypes:
+      - 'kotlin.Function*'
+      - 'kotlin.sequences.Sequence'
+      - 'kotlinx.coroutines.flow.*Flow'
+      - 'java.util.stream.*Stream'
+  ImplicitDefaultLocale:
+    active: true
+  InvalidRange:
+    active: true
+  IteratorHasNextCallsNextMethod:
+    active: true
+  IteratorNotThrowingNoSuchElementException:
+    active: true
+  MapGetWithNotNullAssertionOperator:
+    active: true
+  UnnecessaryNotNullOperator:
+    active: true
+  UnnecessarySafeCall:
+    active: true
+  UnreachableCatchBlock:
+    active: true
+  UnreachableCode:
+    active: true
+  UnsafeCallOnNullableType:
+    active: true
+    excludes: ['**/test/**', '**/androidTest/**']
+  UnsafeCast:
+    active: true
+  UnusedUnaryOperator:
+    active: true
+  UselessPostfixExpression:
+    active: true
+  WrongEqualsTypeParameter:
+    active: true
+
+# ---------------------------------------------------------------------------
+# STYLE
+# ---------------------------------------------------------------------------
+style:
+  active: true
+  AbstractClassCanBeConcreteClass:
+    active: true
+  AbstractClassCanBeInterface:
+    active: true
+  DestructuringDeclarationWithTooManyEntries:
+    active: true
+    maxDestructuringEntries: 3
+  EqualsNullCall:
+    active: true
+  ExplicitItLambdaParameter:
+    active: true
+  ExplicitItLambdaMultipleParameters:
+    active: true
+  ForbiddenComment:
+    active: true
+    comments:
+      - reason: 'Please fix the problem before shipping.'
+        value: 'FIXME:'
+      - reason: 'Must be resolved before release.'
+        value: 'STOPSHIP:'
+      # NOTE: TODO allowed during active development — enable when project stabilises
+      # - reason: 'Forbidden TODO marker, please do the changes.'
+      #   value: 'TODO:'
+    allowedPatterns: ''
+  ForbiddenVoid:
+    active: true
+    ignoreOverridden: false
+    ignoreUsageInGenerics: false
+  FunctionOnlyReturningConstant:
+    active: true
+    ignoreOverridableFunction: true
+    ignoreActualFunction: true
+    excludedFunctions: []
+  LoopWithTooManyJumpStatements:
+    active: true
+    maxJumpCount: 1
+  MagicNumber:
+    active: true
+    excludes:
+      - '**/test/**'
+      - '**/androidTest/**'
+      - '**/*.kts'
+      # Compose UI: dp/sp/alpha values are domain constants, not magic numbers
+      - '**/ui/**'
+      - '**/theme/**'
+      - '**/screen/**'
+      - '**/composable/**'
+    ignoreNumbers:
+      - '-1'
+      - '0'
+      - '1'
+      - '2'
+    ignoreHashCodeFunction: true
+    ignorePropertyDeclaration: true
+    ignoreLocalVariableDeclaration: false
+    ignoreConstantDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+    ignoreAnnotation: false
+    ignoreNamedArgument: true
+    ignoreEnums: true
+    ignoreRanges: false
+    ignoreExtensionFunctions: true
+  MaxLineLength:
+    active: true
+    maxLineLength: 120
+    excludePackageStatements: true
+    excludeImportStatements: true
+    excludeCommentStatements: false
+    excludeRawStrings: true
+  MayBeConstant:
+    active: true
+  ModifierOrder:
+    active: true
+  NestedClassesVisibility:
+    active: true
+  NewLineAtEndOfFile:
+    active: true
+  ObjectLiteralToLambda:
+    active: true
+  OptionalAbstractKeyword:
+    active: true
+  ProtectedMemberInFinalClass:
+    active: true
+  RedundantHigherOrderMapUsage:
+    active: true
+  ReturnCount:
+    active: true
+    max: 3
+    excludedFunctions:
+      - 'equals'
+    excludeLabeled: false
+    excludeReturnFromLambda: true
+    # Guard clauses (early returns) are idiomatic Kotlin — allow them
+    excludeGuardClauses: true
+  SafeCast:
+    active: true
+  SerialVersionUIDInSerializableClass:
+    active: true
+  ThrowsCount:
+    active: true
+    max: 2
+    excludeGuardClauses: true
+  UnnecessaryApply:
+    active: true
+  UnnecessaryFilter:
+    active: true
+  UnnecessaryInheritance:
+    active: true
+  UnusedParameter:
+    active: true
+    allowedNames: 'ignored|expected'
+  UnusedPrivateClass:
+    active: true
+  UnusedPrivateFunction:
+    active: true
+    allowedNames: ''
+  UnusedPrivateProperty:
+    active: true
+    allowedNames: 'ignored|expected|serialVersionUID'
+  UnusedVariable:
+    active: true
+    allowedNames: 'ignored|_'
+  UseAnyOrNoneInsteadOfFind:
+    active: true
+  UseArrayLiteralsInAnnotations:
+    active: true
+  UseCheckNotNull:
+    active: true
+  UseCheckOrError:
+    active: true
+  UseIsNullOrEmpty:
+    active: true
+  UseOrEmpty:
+    active: true
+  UseRequire:
+    active: true
+  UseRequireNotNull:
+    active: true
+  UselessCallOnNotNull:
+    active: true
+  UtilityClassWithPublicConstructor:
+    active: true
+  VarCouldBeVal:
+    active: true
+    ignoreLateinitVar: false
+  WildcardImport:
+    active: true
+    excludeImports:
+      - 'java.util.*'
