@@ -1,0 +1,13 @@
+pre-commit:
+  parallel: false
+  commands:
+    ktlint:
+      run: ./gradlew ktlintCheck
+      stage_fixed: true
+    detekt:
+      run: ./gradlew detekt
+
+commit-msg:
+  commands:
+    validate:
+      run: sh .lefthook/validate-commit-msg.sh {1}
