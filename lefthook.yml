@@ -1,7 +1,10 @@
 pre-commit:
   parallel: false
   commands:
-    ktlint:
+    ktlintFormat:
+      run: ./gradlew ktlintFormat
+      stage_fixed: true
+    ktlintCheck:
       run: ./gradlew ktlintCheck
       stage_fixed: true
     detekt:
