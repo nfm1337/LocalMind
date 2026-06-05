@@ -11,6 +11,8 @@ composeBom = "2026.02.01"
 detekt = "2.0.0-alpha.3"
 ktlint-gradle = "14.2.0"
 jetbrainsKotlinJvm = "2.2.10"
+litert-lm = "0.13.1"
+onnxruntime = "1.26.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -30,7 +32,8 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
 detekt-gradlePlugin = { group = "dev.detekt", name = "detekt-gradle-plugin", version.ref = "detekt" }
 ktlint-gradlePlugin = { group = "org.jlleitschuh.gradle", name = "ktlint-gradle", version.ref = "ktlint-gradle" }
-
+litert-lm = { group = "com.google.ai.edge.litertlm", name = "litertlm-android", version.ref = "litert-lm" }
+onnxruntime = { group = "com.microsoft.onnxruntime", name = "onnxruntime-android", version.ref = "onnxruntime"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
