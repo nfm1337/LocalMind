@@ -1,4 +1,4 @@
-package il.nfm.localmind
+package il.nfm.localmind.ml
 
 class Tokenizer(
     modelPath: String,

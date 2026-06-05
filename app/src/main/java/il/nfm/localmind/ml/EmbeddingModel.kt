@@ -1,4 +1,4 @@
-package il.nfm.localmind
+package il.nfm.localmind.ml
 
 import ai.onnxruntime.OnnxTensor
 import ai.onnxruntime.OrtEnvironment

@@ -23,7 +23,7 @@ static std::string readFile(const char *path) {
 extern "C" {
 
 JNIEXPORT jboolean JNICALL
-Java_il_nfm_localmind_Tokenizer_nativeLoad(JNIEnv *env, jobject, jstring modelPath) {
+Java_il_nfm_localmind_ml_Tokenizer_nativeLoad(JNIEnv *env, jobject, jstring modelPath) {
     const char *path = env->GetStringUTFChars(modelPath, nullptr);
     std::string blob = readFile(path);
     env->ReleaseStringUTFChars(modelPath, path);
@@ -38,7 +38,7 @@ Java_il_nfm_localmind_Tokenizer_nativeLoad(JNIEnv *env, jobject, jstring modelPa
 }
 
 JNIEXPORT jintArray JNICALL
-Java_il_nfm_localmind_Tokenizer_nativeEncode(JNIEnv *env, jobject, jstring text, jint maxLen) {
+Java_il_nfm_localmind_ml_Tokenizer_nativeEncode(JNIEnv *env, jobject, jstring text, jint maxLen) {
     if (!g_tokenizer) {
         LOGE("Tokenizer not loaded");
         return nullptr;
@@ -74,7 +74,7 @@ Java_il_nfm_localmind_Tokenizer_nativeEncode(JNIEnv *env, jobject, jstring text,
 
 
 JNIEXPORT jstring JNICALL
-Java_il_nfm_localmind_Tokenizer_nativeDecode(JNIEnv *env, jobject, jintArray ids) {
+Java_il_nfm_localmind_ml_Tokenizer_nativeDecode(JNIEnv *env, jobject, jintArray ids) {
     if (!g_tokenizer) return env->NewStringUTF("");
 
     jint len = env->GetArrayLength(ids);
