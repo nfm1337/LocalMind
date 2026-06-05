@@ -85,6 +85,9 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
+      - name: Install Rust Android target
+        run: rustup target add aarch64-linux-android
+
       - name: Build debug APK
         run: ./gradlew assembleDebug
 
