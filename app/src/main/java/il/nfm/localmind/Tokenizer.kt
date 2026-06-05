@@ -8,7 +8,6 @@ class Tokenizer(
         check(nativeLoad(modelPath)) { "Failed to load tokenizer: $modelPath" }
     }
 
-    // input_ids + attention_mask с BOS/EOS/PAD
     fun encode(
         text: String,
         maxLen: Int = 512,
