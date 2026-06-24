@@ -3,6 +3,8 @@ plugins {
     id("convention.ktlint")
     id("convention.detekt")
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.jetbrains.kotlin.serialization)
 }
 
 android {
@@ -48,6 +50,13 @@ dependencies {
 
     implementation(libs.litert.lm)
     implementation(libs.onnxruntime)
+    implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+
+    implementation(libs.hilt.core)
+    ksp(libs.hilt.compiler)
+
+    implementation(libs.kotlinx.serialization.core)
+    implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
