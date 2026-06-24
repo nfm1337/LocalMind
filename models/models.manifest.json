@@ -1,0 +1,23 @@
+{
+  "llm": {
+    "fileName": "gemma-4-E2B-it.litertlm",
+    "localPath": "models/llm/gemma-4-E2B-it.litertlm",
+    "devicePath": "models/llm/gemma-4-E2B-it.litertlm",
+    "url": "https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/resolve/main/gemma-4-E2B-it.litertlm",
+    "sha256": "181938105e0eefd105961417e8da75903eacda102c4fce9ce90f50b97139a63c"
+  },
+  "embedder": {
+    "fileName": "multilingual-e5-small.onnx",
+    "localPath": "models/embedding/multilingual-e5-small.onnx",
+    "devicePath": "models/embedding/multilingual-e5-small.onnx",
+    "url": "https://huggingface.co/intfloat/multilingual-e5-small/resolve/main/onnx/model.onnx",
+    "sha256": "ca456c06b3a9505ddfd9131408916dd79290368331e7d76bb621f1cba6bc8665",
+    "tokenizer": {
+      "fileName": "tokenizer.json",
+      "localPath": "models/embedding/tokenizer.json",
+      "devicePath": "models/embedding/tokenizer.json",
+      "url": "https://huggingface.co/intfloat/multilingual-e5-small/resolve/main/onnx/tokenizer.json",
+      "sha256": "0b44a9d7b51c3c62626640cda0e2c2f70fdacdc25bbbd68038369d14ebdf4c39"
+    }
+  }
+}
