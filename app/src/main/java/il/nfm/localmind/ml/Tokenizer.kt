@@ -1,11 +1,11 @@
 package il.nfm.localmind.ml
 
 class Tokenizer(
-    modelPath: String,
+    path: String,
 ) {
     init {
         System.loadLibrary("tokenizer_jni")
-        check(nativeLoad(modelPath)) { "Failed to load tokenizer: $modelPath" }
+        check(nativeLoad(path)) { "Failed to load tokenizer: $path" }
     }
 
     fun encode(
