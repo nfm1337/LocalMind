@@ -24,9 +24,9 @@ verify_device_file() {
     local expected_sha="$3"
     local actual_sha
 
-    actual_sha="$(adb shell sha256sum "$remote_path" 2>/dev/null | awk '{print $1}' | tr -d '\r')"
+    actual_sha="$(adb shell sha256sum "$remote_path" </dev/null 2>/dev/null | awk '{print $1}' | tr -d '\r')"
     if [[ -z "$actual_sha" ]]; then
-        actual_sha="$(adb shell toybox sha256sum "$remote_path" 2>/dev/null | awk '{print $1}' | tr -d '\r')"
+        actual_sha="$(adb shell toybox sha256sum "$remote_path" </dev/null 2>/dev/null | awk '{print $1}' | tr -d '\r')"
     fi
 
     if [[ "$actual_sha" != "$expected_sha" ]]; then
@@ -51,8 +51,8 @@ while IFS=$'\t' read -r file_name local_path device_path expected_sha; do
     remote_dir="$(dirname "$remote_path")"
 
     echo "Pushing $file_name..."
-    adb shell mkdir -p "$remote_dir"
-    adb push "$local_path" "$remote_path" >/dev/null
+    adb shell mkdir -p "$remote_dir" </dev/null
+    adb push "$local_path" "$remote_path" </dev/null >/dev/null
     verify_device_file "$file_name" "$remote_path" "$expected_sha"
     echo "$file_name pushed and verified."
 done < <(read_manifest_entries "fileName,localPath,devicePath,sha256")
