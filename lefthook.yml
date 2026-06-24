@@ -13,4 +13,4 @@ pre-commit:
 commit-msg:
   commands:
     validate:
-      run: sh .lefthook/validate-commit-msg.sh {1}
+      run: sh scripts/validate-commit-msg.sh {1}
