@@ -36,7 +36,7 @@ tasks.register<Exec>("pushModels") {
     commandLine(scriptCommand("push-models"))
 }
 
-tasks.register<Exec>("downloadAndPushModels") {
+tasks.register("downloadAndPushModels") {
     group = "models"
     description = "Downloads models and pushes them to connected android device"
 

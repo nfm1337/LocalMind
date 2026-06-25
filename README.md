@@ -133,25 +133,38 @@ PowerShell script uses `ConvertFrom-Json`.
 
 1. The local file must exist.
 2. Its SHA-256 must match the manifest.
-3. The file is pushed with `adb push`.
-4. The pushed file is verified on the device using `sha256sum`, with fallback to
-   `toybox sha256sum`.
+3. The existing app-sandbox copy is removed to free space, then the file is
+   streamed into the debuggable app's internal `files/` directory with
+   `adb shell -T run-as`.
+4. The pushed file is verified from the app sandbox using `sha256sum`, with
+   fallback to `toybox sha256sum`.
 
-Relative `devicePath` values are pushed under this default root:
+Relative `devicePath` values are pushed under the debug app's internal files
+directory:
 
 ```text
-/sdcard/Android/data/il.nfm.localmind/files
+/data/user/0/il.nfm.localmind/files
 ```
 
-Override it when needed:
+Install the debug app before pushing models so `run-as il.nfm.localmind` is
+available:
 
 ```bash
+./gradlew installDebug
+./gradlew pushModels
+```
+
+Override the package or device root when needed:
+
+```bash
+MODEL_APP_PACKAGE=il.nfm.localmind ./gradlew pushModels
 MODEL_DEVICE_ROOT=/sdcard/Download/LocalMindModels ./gradlew pushModels
 ```
 
 PowerShell:
 
 ```powershell
+$env:MODEL_APP_PACKAGE = "il.nfm.localmind"
 $env:MODEL_DEVICE_ROOT = "/sdcard/Download/LocalMindModels"
 ./gradlew pushModels
 ```

@@ -29,6 +29,9 @@ function Assert-ModelEntryFields {
     )
 
     foreach ($field in $Fields) {
+        if ($Entry.$field -is [string]) {
+            $Entry.$field = $Entry.$field.Replace("`r", "")
+        }
         if ([string]::IsNullOrWhiteSpace($Entry.$field)) {
             Write-Error "ERROR: incomplete model entry in $ManifestPath."
         }
@@ -47,6 +50,7 @@ function Assert-LocalModelFile {
     }
 
     $actualSha = Get-Sha256 -Path $Path
+    $ExpectedSha = $ExpectedSha.Trim()
     if ($actualSha -ne $ExpectedSha) {
         Write-Error "ERROR: $Label hash mismatch at $Path. Expected: $ExpectedSha Actual: $actualSha"
     }

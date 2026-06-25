@@ -15,11 +15,13 @@ read_manifest_entries() {
                 .llm,
                 .embedder,
                 .embedder.tokenizer;
+            def clean:
+                if type == "string" then gsub("\r"; "") else . end;
 
             ($fields | split(",")) as $keys
             | model_entries
             | select(. != null)
-            | [$keys[] as $key | .[$key]]
+            | [$keys[] as $key | .[$key] | clean]
             | @tsv
         ' "$manifest_path"
         return
@@ -42,7 +44,7 @@ entries = [
 
 for entry in entries:
     if entry:
-        print("\t".join(str(entry.get(key, "")) for key in keys))
+        print("\t".join(str(entry.get(key, "")).replace("\r", "") for key in keys))
 PY
         return
     fi
@@ -74,7 +76,8 @@ verify_local_file() {
         exit 1
     fi
 
-    actual_sha="$(sha256 "$path")"
+    expected_sha="${expected_sha//$'\r'/}"
+    actual_sha="$(sha256 "$path" | tr -d '\r')"
     if [[ "$actual_sha" != "$expected_sha" ]]; then
         echo "ERROR: $label hash mismatch at $path." >&2
         echo "Expected: $expected_sha" >&2
