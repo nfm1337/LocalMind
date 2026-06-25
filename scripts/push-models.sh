@@ -28,7 +28,21 @@ verify_device_file() {
     local expected_sha="$3"
     local actual_sha
 
+    actual_sha="$(device_sha "$remote_path")"
     expected_sha="${expected_sha//$'\r'/}"
+
+    if [[ "$actual_sha" != "$expected_sha" ]]; then
+        echo "ERROR: $label device hash mismatch at $remote_path." >&2
+        echo "Expected: $expected_sha" >&2
+        echo "Actual:   ${actual_sha:-<missing>}" >&2
+        exit 1
+    fi
+}
+
+device_sha() {
+    local remote_path="$1"
+    local actual_sha
+
     if [[ -n "$device_root" || "$remote_path" == /* ]]; then
         actual_sha="$(adb shell sha256sum "$remote_path" </dev/null 2>/dev/null | awk '{print $1}' | tr -d '\r' || true)"
         if [[ -z "$actual_sha" ]]; then
@@ -41,11 +55,30 @@ verify_device_file() {
         fi
     fi
 
-    if [[ "$actual_sha" != "$expected_sha" ]]; then
-        echo "ERROR: $label device hash mismatch at $remote_path." >&2
-        echo "Expected: $expected_sha" >&2
-        echo "Actual:   ${actual_sha:-<missing>}" >&2
-        exit 1
+    echo "$actual_sha"
+}
+
+device_file_matches() {
+    local remote_path="$1"
+    local expected_sha="$2"
+    local actual_sha
+
+    expected_sha="${expected_sha//$'\r'/}"
+    actual_sha="$(device_sha "$remote_path")"
+    [[ -n "$actual_sha" && "$actual_sha" == "$expected_sha" ]]
+}
+
+push_file() {
+    local local_path="$1"
+    local remote_path="$2"
+    local remote_dir="$3"
+
+    if [[ -n "$device_root" || "$remote_path" == /* ]]; then
+        adb shell mkdir -p "$remote_dir" </dev/null
+        adb push "$local_path" "$remote_path" </dev/null >/dev/null
+    else
+        adb shell run-as "$app_package" mkdir -p "$remote_dir" </dev/null
+        push_to_app_sandbox "$local_path" "$remote_path"
     fi
 }
 
@@ -84,14 +117,13 @@ while IFS=$'\t' read -r file_name local_path device_path expected_sha; do
     remote_path="$(remote_path_for "$device_path")"
     remote_dir="$(dirname "$remote_path")"
 
-    echo "Pushing $file_name..."
-    if [[ -n "$device_root" || "$remote_path" == /* ]]; then
-        adb shell mkdir -p "$remote_dir" </dev/null
-        adb push "$local_path" "$remote_path" </dev/null >/dev/null
-    else
-        adb shell run-as "$app_package" mkdir -p "$remote_dir" </dev/null
-        push_to_app_sandbox "$local_path" "$remote_path"
+    if device_file_matches "$remote_path" "$expected_sha"; then
+        echo "$file_name already pushed."
+        continue
     fi
+
+    echo "Pushing $file_name..."
+    push_file "$local_path" "$remote_path" "$remote_dir"
     verify_device_file "$file_name" "$remote_path" "$expected_sha"
     echo "$file_name pushed and verified."
 done < <(read_manifest_entries "fileName,localPath,devicePath,sha256")

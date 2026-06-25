@@ -49,6 +49,15 @@ function Verify-DeviceFile {
     )
 
     $ExpectedSha = $ExpectedSha.Trim()
+    $actualSha = Get-DeviceSha -RemotePath $RemotePath
+    if ($actualSha -ne $ExpectedSha) {
+        Write-Error "ERROR: $Label device hash mismatch at $RemotePath. Expected: $ExpectedSha Actual: $actualSha"
+    }
+}
+
+function Get-DeviceSha {
+    param([string]$RemotePath)
+
     if ((-not [string]::IsNullOrWhiteSpace($deviceRoot)) -or $RemotePath.StartsWith("/")) {
         $hashOutput = (& adb shell sha256sum $RemotePath 2>$null)
         if ([string]::IsNullOrWhiteSpace($hashOutput)) {
@@ -62,12 +71,37 @@ function Verify-DeviceFile {
     }
 
     if ([string]::IsNullOrWhiteSpace($hashOutput)) {
-        Write-Error "ERROR: could not read device hash for $Label at $RemotePath."
+        return ""
     }
 
-    $actualSha = ($hashOutput -split "\s+")[0].Trim().ToLowerInvariant()
-    if ($actualSha -ne $ExpectedSha) {
-        Write-Error "ERROR: $Label device hash mismatch at $RemotePath. Expected: $ExpectedSha Actual: $actualSha"
+    return ($hashOutput -split "\s+")[0].Trim().ToLowerInvariant()
+}
+
+function Test-DeviceFileMatches {
+    param(
+        [string]$RemotePath,
+        [string]$ExpectedSha
+    )
+
+    $actualSha = Get-DeviceSha -RemotePath $RemotePath
+    return (-not [string]::IsNullOrWhiteSpace($actualSha)) -and ($actualSha -eq $ExpectedSha.Trim())
+}
+
+function Push-ModelFile {
+    param(
+        [string]$LocalPath,
+        [string]$RemotePath,
+        [string]$RemoteDirectory
+    )
+
+    if ((-not [string]::IsNullOrWhiteSpace($deviceRoot)) -or $RemotePath.StartsWith("/")) {
+        & adb shell mkdir -p $RemoteDirectory
+        & adb push $LocalPath $RemotePath | Out-Null
+    } else {
+        & adb shell run-as $appPackage mkdir -p $RemoteDirectory
+        Copy-FileToAppSandbox `
+            -LocalPath $LocalPath `
+            -RemotePath $RemotePath
     }
 }
 
@@ -131,16 +165,16 @@ foreach ($entry in (Get-ModelEntries)) {
     $remotePath = Get-RemotePath -DevicePath $entry.devicePath
     $remoteDirectory = Get-RemoteDirectory -RemotePath $remotePath
 
-    Write-Host "Pushing $($entry.fileName)..."
-    if ((-not [string]::IsNullOrWhiteSpace($deviceRoot)) -or $remotePath.StartsWith("/")) {
-        & adb shell mkdir -p $remoteDirectory
-        & adb push $entry.localPath $remotePath | Out-Null
-    } else {
-        & adb shell run-as $appPackage mkdir -p $remoteDirectory
-        Copy-FileToAppSandbox `
-            -LocalPath $entry.localPath `
-            -RemotePath $remotePath
+    if (Test-DeviceFileMatches -RemotePath $remotePath -ExpectedSha $entry.sha256) {
+        Write-Host "$($entry.fileName) already pushed."
+        continue
     }
+
+    Write-Host "Pushing $($entry.fileName)..."
+    Push-ModelFile `
+        -LocalPath $entry.localPath `
+        -RemotePath $remotePath `
+        -RemoteDirectory $remoteDirectory
     Verify-DeviceFile `
         -Label $entry.fileName `
         -RemotePath $remotePath `
