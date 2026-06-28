@@ -43,3 +43,19 @@ tasks.register("downloadAndPushModels") {
 
     dependsOn("downloadModels", "pushModels")
 }
+
+tasks.register("connectedModelProbeAndroidTest") {
+    group = "verification"
+    description = "Installs debug app, pushes models, and runs the opt-in physical model coexistence smoke test"
+
+    dependsOn(":app:installDebug", "pushModels", ":app:connectedDebugAndroidTest")
+}
+
+gradle.projectsEvaluated {
+    tasks.named("pushModels").configure {
+        mustRunAfter(":app:installDebug")
+    }
+    project(":app").tasks.named("connectedDebugAndroidTest").configure {
+        mustRunAfter(tasks.named("pushModels"))
+    }
+}

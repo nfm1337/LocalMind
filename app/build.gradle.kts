@@ -10,6 +10,14 @@ plugins {
 
 android {
     namespace = "il.nfm.localmind"
+    val isModelProbeTask =
+        gradle.startParameter.taskNames.any { it.endsWith("connectedModelProbeAndroidTest") }
+    val physicalModelProbe =
+        providers
+            .gradleProperty("physicalModelProbe")
+            .orElse(if (isModelProbeTask) "true" else "false")
+    val modelProbeAppCommit =
+        providers.gradleProperty("modelProbeAppCommit").orElse("androidTest-run")
 
     defaultConfig {
         applicationId = "il.nfm.localmind"
@@ -17,6 +25,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments["physicalModelProbe"] = physicalModelProbe.get()
+        testInstrumentationRunnerArguments["modelProbeAppCommit"] = modelProbeAppCommit.get()
 
         ndk {
             //noinspection ChromeOsAbiSupport

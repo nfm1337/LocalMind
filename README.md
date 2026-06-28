@@ -217,6 +217,20 @@ Common commands:
 ./gradlew detekt
 ```
 
+Physical model coexistence probe:
+
+```bash
+./gradlew connectedModelProbeAndroidTest -PmodelProbeAppCommit=$(git rev-parse --short HEAD)
+```
+
+This opt-in instrumentation smoke test installs the debug app, pushes the models,
+and runs the fixed 10-note LLM/embedder coexistence probe on a connected physical
+device. It is intentionally not part of normal unit or instrumentation test runs
+because it requires the large model files, `adb`, and device-specific memory and
+latency measurements. The test logs a CSV row with tag
+`ModelCoexistenceSmokeTest`; copy completed physical-device runs into
+[`docs/model-coexistence-results.csv`](docs/model-coexistence-results.csv).
+
 The project uses local convention plugins:
 
 - `convention.android.app`: Android app defaults
