@@ -14,16 +14,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
-import il.nfm.localmind.ml.LLMEngine
-import il.nfm.localmind.ml.RetrieverImpl
 
 @Composable
-fun QuestionScreen(
-    llmEngine: LLMEngine,
-    retriever: RetrieverImpl,
-    viewModel: QuestionViewModel = viewModel(factory = QuestionViewModel.factory(llmEngine, retriever)),
-) {
+fun QuestionScreen(viewModel: QuestionViewModel) {
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
 
     QuestionScreenContent(uiState = uiState.value, onQuery = viewModel::query)

@@ -1,13 +1,17 @@
 package il.nfm.localmind
 
 import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
+import il.nfm.localmind.ml.Retriever
+import javax.inject.Inject
 
+@HiltAndroidApp
 class LocalMindApp : Application() {
-    lateinit var container: AppContainer
-        private set
+    @Inject
+    lateinit var retriever: Retriever
 
     override fun onCreate() {
         super.onCreate()
-        container = AppContainer(this)
+        check(::retriever.isInitialized) { "Retriever was not injected" }
     }
 }

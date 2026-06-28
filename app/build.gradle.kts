@@ -4,6 +4,7 @@ plugins {
     id("convention.detekt")
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
     alias(libs.plugins.jetbrains.kotlin.serialization)
 }
 
