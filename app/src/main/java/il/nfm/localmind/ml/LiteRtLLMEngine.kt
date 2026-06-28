@@ -1,5 +1,6 @@
 package il.nfm.localmind.ml
 
+import android.os.SystemClock
 import com.google.ai.edge.litertlm.Backend
 import com.google.ai.edge.litertlm.ConversationConfig
 import com.google.ai.edge.litertlm.Engine
@@ -27,14 +28,20 @@ class LiteRtLLMEngine(
     @Volatile
     private var engine: Engine? = null
 
+    @Volatile
+    private var loadMs: Long = 0L
+
     @Suppress("TooGenericExceptionCaught")
-    override suspend fun initialize() =
+    override suspend fun initialize(): Long =
         mutex.withLock {
-            if (engine != null) return@withLock
+            if (engine != null) return@withLock loadMs
             _state.value = LLMEngine.State.Initializing
             try {
+                val startMs = SystemClock.elapsedRealtime()
                 engine = withContext(Dispatchers.Default) { createAndInit() }
+                loadMs = SystemClock.elapsedRealtime() - startMs
                 _state.value = LLMEngine.State.Ready
+                loadMs
             } catch (e: CancellationException) {
                 _state.value = LLMEngine.State.Idle
                 throw e
@@ -61,6 +68,7 @@ class LiteRtLLMEngine(
         mutex.withLock {
             runCatching { engine?.close() }
             engine = null
+            loadMs = 0L
             _state.value = LLMEngine.State.Idle
         }
 

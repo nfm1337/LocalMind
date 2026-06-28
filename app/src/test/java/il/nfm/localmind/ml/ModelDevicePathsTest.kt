@@ -9,36 +9,34 @@ import java.io.File
 
 class ModelDevicePathsTest {
     @Test
-    fun debugModelPathsMatchManifestDevicePaths() {
+    fun debugModelPathsMatchManifestPaths() {
         val manifest = Json.parseToJsonElement(modelManifest.readText()).jsonObject
+        val llm = manifest.getValue("llm").jsonObject
+        val embedder = manifest.getValue("embedder").jsonObject
+        val tokenizer = embedder.getValue("tokenizer").jsonObject
 
         assertEquals(
-            manifest
-                .getValue("llm")
-                .jsonObject
-                .getValue("devicePath")
-                .jsonPrimitive
-                .content,
+            "models/llm/gemma-4-E2B-it.litertlm",
+            llm.getValue("localPath").jsonPrimitive.content,
+        )
+        assertEquals(
+            llm.getValue("devicePath").jsonPrimitive.content,
             ModelDevicePaths.LLM,
         )
         assertEquals(
-            manifest
-                .getValue("embedder")
-                .jsonObject
-                .getValue("devicePath")
-                .jsonPrimitive
-                .content,
+            "models/embedding/multilingual-e5-small.onnx",
+            embedder.getValue("localPath").jsonPrimitive.content,
+        )
+        assertEquals(
+            embedder.getValue("devicePath").jsonPrimitive.content,
             ModelDevicePaths.EMBEDDER,
         )
         assertEquals(
-            manifest
-                .getValue("embedder")
-                .jsonObject
-                .getValue("tokenizer")
-                .jsonObject
-                .getValue("devicePath")
-                .jsonPrimitive
-                .content,
+            "models/embedding/tokenizer.json",
+            tokenizer.getValue("localPath").jsonPrimitive.content,
+        )
+        assertEquals(
+            tokenizer.getValue("devicePath").jsonPrimitive.content,
             ModelDevicePaths.EMBEDDER_TOKENIZER,
         )
     }

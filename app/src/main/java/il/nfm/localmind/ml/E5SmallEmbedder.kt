@@ -3,6 +3,7 @@ package il.nfm.localmind.ml
 import ai.onnxruntime.OnnxTensor
 import ai.onnxruntime.OrtEnvironment
 import ai.onnxruntime.OrtSession
+import android.os.SystemClock
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,24 +23,24 @@ class E5SmallEmbedder(
     @Volatile
     private var loaded: Loaded? = null
 
+    @Volatile
+    private var loadMetrics = EmbedderLoadMetrics(embedderLoadMs = 0L, tokenizerLoadMs = 0L)
+
     private val _state = MutableStateFlow<Embedder.State>(Embedder.State.Idle)
     override val state = _state.asStateFlow()
 
     @Suppress("TooGenericExceptionCaught")
-    override suspend fun initialize() =
+    override suspend fun initialize(): EmbedderLoadMetrics =
         mutex.withLock {
-            if (loaded != null) return@withLock
+            if (loaded != null) return@withLock loadMetrics
             _state.value = Embedder.State.Initializing
 
             try {
-                loaded =
-                    withContext(Dispatchers.IO) {
-                        Loaded(
-                            session = env.createSession(modelPath, OrtSession.SessionOptions()),
-                            tokenizer = Tokenizer(tokenizerPath),
-                        )
-                    }
+                val loadedAndMetrics = withContext(Dispatchers.IO) { loadModelAndTokenizer() }
+                loaded = loadedAndMetrics.loaded
+                loadMetrics = loadedAndMetrics.metrics
                 _state.value = Embedder.State.Ready
+                loadMetrics
             } catch (e: CancellationException) {
                 _state.value = Embedder.State.Idle
                 throw e
@@ -49,16 +50,36 @@ class E5SmallEmbedder(
             }
         }
 
-    override suspend fun embedQuery(text: String): FloatArray = embed("query: $text")
+    override suspend fun embedQuery(text: String): FloatArray = embed(e5QueryText(text))
 
-    override suspend fun embedPassage(text: String): FloatArray = embed("passage: $text")
+    override suspend fun embedPassage(text: String): FloatArray = embed(e5PassageText(text))
 
     override suspend fun close() =
         mutex.withLock {
             runCatching { loaded?.session?.close() }
             loaded = null
+            loadMetrics = EmbedderLoadMetrics(embedderLoadMs = 0L, tokenizerLoadMs = 0L)
             _state.value = Embedder.State.Idle
         }
+
+    private fun loadModelAndTokenizer(): LoadedAndMetrics {
+        val sessionStart = SystemClock.elapsedRealtime()
+        val session = env.createSession(modelPath, OrtSession.SessionOptions())
+        val sessionLoadMs = SystemClock.elapsedRealtime() - sessionStart
+
+        val tokenizerStart = SystemClock.elapsedRealtime()
+        val tokenizer = Tokenizer(tokenizerPath)
+        val tokenizerLoadMs = SystemClock.elapsedRealtime() - tokenizerStart
+
+        return LoadedAndMetrics(
+            loaded = Loaded(session = session, tokenizer = tokenizer),
+            metrics =
+                EmbedderLoadMetrics(
+                    embedderLoadMs = sessionLoadMs + tokenizerLoadMs,
+                    tokenizerLoadMs = tokenizerLoadMs,
+                ),
+        )
+    }
 
     private suspend fun embed(text: String): FloatArray =
         withContext(Dispatchers.Default) {
@@ -96,4 +117,13 @@ class E5SmallEmbedder(
         val session: OrtSession,
         val tokenizer: Tokenizer,
     )
+
+    private class LoadedAndMetrics(
+        val loaded: Loaded,
+        val metrics: EmbedderLoadMetrics,
+    )
 }
+
+fun e5QueryText(text: String): String = "query: $text"
+
+fun e5PassageText(text: String): String = "passage: $text"

@@ -40,7 +40,12 @@ private fun QuestionScreenContent(
                     .padding(8.dp),
             onQuery = { onQuery(it) },
         )
-        QuestionOutput(result = uiState.result, modifier = Modifier.fillMaxWidth().weight(1f))
+        QuestionOutput(
+            result = uiState.result,
+            retrieved = uiState.retrieved,
+            metrics = uiState.metrics,
+            modifier = Modifier.fillMaxWidth().weight(1f),
+        )
     }
 }
 
@@ -66,9 +71,11 @@ private fun QuestionOutput(
     result: String,
     modifier: Modifier = Modifier,
     retrieved: List<String> = emptyList(),
+    metrics: String = "",
 ) {
     Column(modifier = modifier.verticalScroll(rememberScrollState())) {
-        Text(text = retrieved.joinToString(", "))
+        Text(text = "Retrieved: ${retrieved.joinToString(", ")}")
         Text(text = result)
+        Text(text = metrics)
     }
 }

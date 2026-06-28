@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 interface LLMEngine {
     val state: Flow<State>
 
-    suspend fun initialize()
+    suspend fun initialize(): Long
 
     suspend fun close()
 

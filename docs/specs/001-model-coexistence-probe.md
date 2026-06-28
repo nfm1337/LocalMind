@@ -1,7 +1,7 @@
 # Spec: Model Coexistence Probe
 
 ## Status
-Draft
+Finished
 
 ## Goal
 Prove that LLM and embedding models can be loaded together and used on a Nothing Phone 2A.
@@ -109,22 +109,22 @@ Simplest UX - text field for input and button to submit.
   `docs/model-coexistence-results.csv`.
 
 ## Results
-- Device:
-- Android version:
-- App commit:
-- LLM model:
-- Embedder model:
-- Tokenizer:
-- LLM load time:
-- Embedder load time:
-- Tokenizer load time:
-- Peak memory:
-- TTFT:
-- Tokens/sec:
-- Query embedding latency:
-- Passage embedding latency for 10 notes:
-- Retrieval latency:
-- Outcome:
+- Device: Nothing A142
+- Android version: 16
+- App commit: 7ec2656-dirty
+- LLM model: models/llm/gemma-4-E2B-it.litertlm
+- Embedder model: models/embedding/multilingual-e5-small.onnx
+- Tokenizer: models/embedding/tokenizer.json
+- LLM load time: 9512 ms
+- Embedder load time: 5388 ms
+- Tokenizer load time: 3498 ms
+- Peak memory: 3388 MB PSS / 3440 MB RSS with both models loaded
+- TTFT: 1704 ms
+- Tokens/sec: 5.20
+- Query embedding latency: 473 ms
+- Passage embedding latency for 10 notes: 4794 ms
+- Retrieval latency: 2 ms
+- Outcome: pass; retrieved expected note and generated answer used retrieved note.
 
 ## Generated Test Expectations
 An implementation agent should generate focused tests or smoke checks for:
@@ -139,6 +139,8 @@ An implementation agent should generate focused tests or smoke checks for:
 
 ## Open Questions
 - Can the embedder and LLM model run at the same time on the test device?
+  Yes. The physical-device probe completed with both models resident during
+  passage embedding, query embedding, retrieval, and generation.
 
 ## Test Device
 - Device: Nothing Phone 2A
@@ -147,8 +149,8 @@ An implementation agent should generate focused tests or smoke checks for:
 - Build type: debug
 
 ## Verification
-- [ ] `./gradlew ktlintCheck`
-- [ ] `./gradlew detekt`
-- [ ] `./gradlew test`
-- [ ] `./gradlew assembleDebug` if native/Gradle/app wiring changed
-- [ ] Physical device smoke test if behavior depends on model/device runtime
+- [x] `./gradlew ktlintCheck`
+- [x] `./gradlew detekt`
+- [x] `./gradlew test`
+- [x] `./gradlew assembleDebug` if native/Gradle/app wiring changed
+- [x] Physical device smoke test if behavior depends on model/device runtime

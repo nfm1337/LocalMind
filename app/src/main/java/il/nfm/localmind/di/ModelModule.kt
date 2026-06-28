@@ -1,23 +1,18 @@
 package il.nfm.localmind.di
 
 import android.content.Context
-import android.util.Log
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import il.nfm.localmind.data.model.loadNotes
 import il.nfm.localmind.ml.DebugModelPathProvider
 import il.nfm.localmind.ml.E5SmallEmbedder
 import il.nfm.localmind.ml.Embedder
 import il.nfm.localmind.ml.LLMEngine
 import il.nfm.localmind.ml.LiteRtLLMEngine
+import il.nfm.localmind.ml.ModelCoexistenceProbe
 import il.nfm.localmind.ml.ModelPathProvider
-import il.nfm.localmind.ml.Retriever
-import il.nfm.localmind.ml.RetrieverImpl
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import javax.inject.Singleton
 
 @Module
@@ -44,18 +39,8 @@ object ModelModule {
 
     @Provides
     @Singleton
-    fun provideRetriever(
+    fun provideModelCoexistenceProbe(
+        llmEngine: LLMEngine,
         embedder: Embedder,
-        @ApplicationContext context: Context,
-        @ApplicationScope appScope: CoroutineScope,
-    ): Retriever {
-        val retriever = RetrieverImpl(embedder)
-        appScope.launch {
-            retriever.state.collect { Log.d("Retriever", "state: $it") }
-        }
-        appScope.launch {
-            retriever.build(context.assets.loadNotes())
-        }
-        return retriever
-    }
+    ): ModelCoexistenceProbe = ModelCoexistenceProbe(llmEngine = llmEngine, embedder = embedder)
 }

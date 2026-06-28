@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 interface Embedder {
     val state: Flow<State>
 
-    suspend fun initialize()
+    suspend fun initialize(): EmbedderLoadMetrics
 
     suspend fun embedQuery(text: String): FloatArray
 
@@ -25,3 +25,8 @@ interface Embedder {
         ) : State
     }
 }
+
+data class EmbedderLoadMetrics(
+    val embedderLoadMs: Long,
+    val tokenizerLoadMs: Long,
+)
