@@ -4,15 +4,21 @@
 Finished
 
 ## Goal
-Prove that LLM and embedding models can be loaded together and used on a Nothing Phone 2A.
+Prove that LLM and embedding models can be loaded together and each run on a
+Nothing Phone 2A without the app being killed.
 
 ## Context
 The biggest technical risk in the project is the LLM and embedding model running simultaneously.
 
 ## Probe Boundary
-This spec answers whether the LLM and embedder can coexist in memory and run in
-one foreground question-answer flow over fixed notes. It does not establish the
-final retrieval architecture.
+This spec answers whether the LLM and embedder can coexist in memory and perform
+their minimal independent workloads in one app session. It does not establish
+the retrieval architecture or the quality of RAG over notes.
+
+The finished implementation also exercised a tiny fixed-note retrieval flow to
+force the models to remain resident through a realistic sequence. That result is
+useful evidence for this probe, but the RAG behavior itself belongs to
+`docs/specs/002-hardcoded-notes-rag.md`.
 
 ## Non-Goals
 - User-friendly UI
@@ -26,45 +32,22 @@ final retrieval architecture.
 - Real note CRUD
 
 ## User / Developer Flow
-1. User submits a question
-2. The embedding model embeds the question and finds a note related to it
-3. The LLM generates an answer from the retrieved note
-4. User sees the generated answer
+1. Developer launches the probe app on the physical target device.
+2. The app loads the LLM, embedding model, and tokenizer.
+3. The app embeds a hardcoded text while the LLM remains resident.
+4. The app generates from a hardcoded prompt while the embedder remains resident.
+5. Developer records load time, runtime latency, throughput, and memory.
 
 ## Requirements
 - LLM model loads and runs on device
 - Embedding model loads and runs on device
-- Both models remain resident while the app embeds the query, retrieves from the
-  fixed notes, and generates an answer
+- Both models remain resident while the app embeds text and generates an answer
 - The probe can be repeated with different LLM/embedder combinations without
   changing the result schema
 
 ## Data / State
-Use 10 preloaded notes and operate only on them.
-
-The implementation may keep these notes in code for this probe. Use stable IDs so
-retrieval tests can assert the expected result.
-
-| ID               | Note                                                                                       |
-|------------------|--------------------------------------------------------------------------------------------|
-| `note_groceries` | Bought milk, eggs, tomatoes, and coffee from the neighborhood grocery store.               |
-| `note_tax`       | Paid quarterly taxes on Tuesday and saved the confirmation number in email.                |
-| `note_flight`    | Flight to Berlin leaves Friday morning from terminal 3.                                    |
-| `note_book`      | Recommended book: The Design of Everyday Things, especially the chapter about affordances. |
-| `note_gym`       | Gym session focused on squats, rowing, and stretching.                                     |
-| `note_dentist`   | Dentist appointment is scheduled for next Monday at 09:30.                                 |
-| `note_project`   | LocalMind needs the LLM and embedding model to fit in memory on a mid-range phone.         |
-| `note_recipe`    | Pasta sauce recipe uses tomatoes, garlic, olive oil, basil, and parmesan.                  |
-| `note_birthday`  | Maya's birthday gift idea: noise-canceling headphones.                                     |
-| `note_wifi`      | Home Wi-Fi router admin page is at 192.168.1.1.                                            |
-
-## Probe Cases
-
-| Query                                               | Expected note ID |
-|-----------------------------------------------------|------------------|
-| What do I need to prove for LocalMind on the phone? | `note_project`   |
-| When is my dentist appointment?                     | `note_dentist`   |
-| What should I buy for Maya?                         | `note_birthday`  |
+Use only hardcoded probe inputs. No notes, persistence, or reusable app state are
+required for this spec.
 
 ## Test Matrix
 Record each model combination in `docs/model-coexistence-results.csv`.
@@ -74,7 +57,8 @@ combination. If a model cannot load, still record the row with `outcome=fail`
 and fill in the failure notes.
 
 ## UX Notes
-Simplest UX - text field for input and button to submit.
+Simplest UX: a single screen that runs the probe and shows pass/fail plus the
+recorded metrics.
 
 ## Technical Notes
 - LLM: models/llm/gemma-4-E2B-it.litertlm
@@ -92,8 +76,7 @@ Simplest UX - text field for input and button to submit.
 - Embedder load time
 - Tokenizer load time
 - First query embedding latency
-- Passage embedding latency for 10 notes
-- Retrieval latency
+- Hardcoded text embedding latency
 - Time to first token
 - Tokens/sec
 - Peak RSS / PSS with both models loaded
@@ -101,10 +84,8 @@ Simplest UX - text field for input and button to submit.
 
 ## Acceptance Criteria
 - App does not crash or get killed with both models resident.
-- Both models can run sequentially in one user flow.
+- Both models can run sequentially in one app session.
 - Peak memory is recorded and considered survivable on the target device.
-- A question over 10 fixed notes retrieves the expected note.
-- The generated answer uses content from the retrieved note.
 - Metrics are recorded in the Results section below and in
   `docs/model-coexistence-results.csv`.
 
@@ -126,6 +107,11 @@ Simplest UX - text field for input and button to submit.
 - Retrieval latency: 2 ms
 - Outcome: pass; retrieved expected note and generated answer used retrieved note.
 
+Note: this run used the fixed-note RAG smoke path that later became
+`docs/specs/002-hardcoded-notes-rag.md`. For Phase 0, the relevant result is
+that the app survived with both models resident and both model runtimes executed
+in one foreground session.
+
 ## Generated Test Expectations
 An implementation agent should generate focused tests or smoke checks for:
 
@@ -133,7 +119,7 @@ An implementation agent should generate focused tests or smoke checks for:
 - The embedder applies the E5 `query: ` and `passage: ` prefixes.
 - Embeddings are mean-pooled and L2-normalized.
 - The fixed-note retrieval path returns the expected note for at least one known
-  probe case.
+  smoke case if the implementation still uses that path to exercise both models.
 - Metrics logging emits every field required by
   `docs/model-coexistence-results.csv`.
 
