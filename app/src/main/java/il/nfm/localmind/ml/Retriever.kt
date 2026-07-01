@@ -1,7 +1,6 @@
 package il.nfm.localmind.ml
 
 import il.nfm.localmind.data.model.Note
-import il.nfm.localmind.data.model.RetrievedNote
 
 interface Retriever {
     suspend fun build(notes: List<Note>)
@@ -9,7 +8,22 @@ interface Retriever {
     suspend fun topK(
         query: String,
         k: Int = 5,
-    ): List<RetrievedNote>
+    ): Response
+
+    data class Response(
+        val results: List<RetrievedNote>,
+        val metrics: Metrics,
+    )
+
+    data class RetrievedNote(
+        val note: Note,
+        val score: Float,
+    )
+
+    data class Metrics(
+        val queryEmbeddingMs: Long,
+        val retrievalMs: Long,
+    )
 
     sealed interface State {
         data object Idle : State

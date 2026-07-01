@@ -44,8 +44,13 @@ class QuestionViewModel
             }
             viewModelScope.launch {
                 try {
-                    val notes = retriever.topK(query)
-                    val prompt = buildPrompt(query, notes.map { it.note.content })
+                    val retrieval = retriever.topK(query)
+
+                    Log.d(RETRIEVAL_METRICS_TAG, "queryEmbeddingMs: ${retrieval.metrics.queryEmbeddingMs}")
+                    Log.d(RETRIEVAL_METRICS_TAG, "retrievalMs: ${retrieval.metrics.retrievalMs}")
+
+                    val notes = retrieval.results
+
                     _uiState.update { state ->
                         state.copy(
                             retrieved =
@@ -54,6 +59,8 @@ class QuestionViewModel
                                 },
                         )
                     }
+
+                    val prompt = buildPrompt(query, notes.map { it.note.content })
                     llmEngine
                         .askOnce(prompt)
                         .onCompletion { _uiState.update { it.copy(isLoading = false) } }
@@ -89,5 +96,6 @@ class QuestionViewModel
 
         private companion object {
             const val TAG = "QuestionViewModel"
+            const val RETRIEVAL_METRICS_TAG = "RetrievalMetrics"
         }
     }

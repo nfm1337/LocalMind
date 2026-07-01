@@ -7,6 +7,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 
 class RetrieverTest {
     @Test
@@ -41,7 +42,7 @@ class RetrieverTest {
         runTest {
             val retriever = builtRetrieverWithTwoNotes()
 
-            val result = retriever.topK("query")
+            val result = retriever.topK("query").results
 
             assertEquals(
                 expected = listOf("b", "a"),
@@ -54,7 +55,7 @@ class RetrieverTest {
         runTest {
             val retriever = builtRetrieverWithTwoNotes()
 
-            val result = retriever.topK("query", k = 1)
+            val result = retriever.topK("query", k = 1).results
 
             assertEquals(
                 expected = listOf("b"),
@@ -74,7 +75,7 @@ class RetrieverTest {
             val retriever = RetrieverImpl(embedder)
             retriever.build(emptyList())
 
-            val result = retriever.topK("query", k = 1)
+            val result = retriever.topK("query", k = 1).results
 
             assertEquals(
                 expected = emptyList(),
@@ -88,12 +89,21 @@ class RetrieverTest {
             val retriever = builtRetrieverWithTwoNotes()
 
             val k = 5
-            val result = retriever.topK("query", k = k)
+            val result = retriever.topK("query", k = k).results
 
             assertEquals(
                 expected = listOf("b", "a"),
                 actual = result.map { it.note.id },
             )
+        }
+
+    @Test
+    fun `topK returns retrieval metrics`() =
+        runTest {
+            val retriever = builtRetrieverWithTwoNotes()
+            val metrics = retriever.topK("query").metrics
+
+            assertTrue(metrics.retrievalMs >= 0 && metrics.queryEmbeddingMs >= 0)
         }
 
     private suspend fun builtRetrieverWithTwoNotes(): Retriever {

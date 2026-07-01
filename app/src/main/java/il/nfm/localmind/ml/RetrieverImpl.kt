@@ -1,10 +1,10 @@
 package il.nfm.localmind.ml
 
 import il.nfm.localmind.data.model.Note
-import il.nfm.localmind.data.model.RetrievedNote
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlin.time.TimeSource
 
 class RetrieverImpl(
     private val embedder: Embedder,
@@ -34,20 +34,33 @@ class RetrieverImpl(
     override suspend fun topK(
         query: String,
         k: Int,
-    ): List<RetrievedNote> {
+    ): Retriever.Response {
         require(k > 0) { "k must be positive, got $k" }
         check(_state.value == Retriever.State.Ready) { "Retriever index is not ready: ${_state.value}" }
-
+        val beforeQueryEmbedding = TimeSource.Monotonic.markNow()
         val queryVector = embedder.embedQuery(query)
+        val queryEmbeddingMs = beforeQueryEmbedding.elapsedNow().inWholeMilliseconds
 
-        return index
-            .map { embedded ->
-                RetrievedNote(
-                    note = embedded.note,
-                    score = dot(queryVector, embedded.vector),
-                )
-            }.sortedByDescending { it.score }
-            .take(k)
+        val beforeRetrieval = TimeSource.Monotonic.markNow()
+        val results =
+            index
+                .map { embedded ->
+                    Retriever.RetrievedNote(
+                        note = embedded.note,
+                        score = dot(queryVector, embedded.vector),
+                    )
+                }.sortedByDescending { it.score }
+                .take(k)
+        val retrievalMs = beforeRetrieval.elapsedNow().inWholeMilliseconds
+
+        return Retriever.Response(
+            results = results,
+            metrics =
+                Retriever.Metrics(
+                    queryEmbeddingMs = queryEmbeddingMs,
+                    retrievalMs = retrievalMs,
+                ),
+        )
     }
 
     private class EmbeddedNote(
