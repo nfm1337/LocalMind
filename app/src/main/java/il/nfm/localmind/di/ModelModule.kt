@@ -54,7 +54,8 @@ object ModelModule {
             retriever.state.collect { Log.d("Retriever", "state: $it") }
         }
         appScope.launch {
-            retriever.build(context.assets.loadNotes())
+            runCatching { retriever.build(context.assets.loadNotes()) }
+                .onFailure { Log.e("Retriever", "Failed to build note index", it) }
         }
         return retriever
     }

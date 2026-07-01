@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.nio.LongBuffer
 
 class E5SmallEmbedder(
@@ -63,6 +64,9 @@ class E5SmallEmbedder(
         }
 
     private fun loadModelAndTokenizer(): LoadedAndMetrics {
+        requireReadableFile(modelPath, "Embedding model")
+        requireReadableFile(tokenizerPath, "Embedding tokenizer")
+
         val sessionStart = SystemClock.elapsedRealtime()
         val session = env.createSession(modelPath, OrtSession.SessionOptions())
         val sessionLoadMs = SystemClock.elapsedRealtime() - sessionStart
@@ -122,6 +126,16 @@ class E5SmallEmbedder(
         val loaded: Loaded,
         val metrics: EmbedderLoadMetrics,
     )
+}
+
+private fun requireReadableFile(
+    path: String,
+    label: String,
+) {
+    val file = File(path)
+    require(file.isFile && file.canRead()) {
+        "$label is missing or unreadable at $path. Run ./gradlew downloadModels pushModels for this app install."
+    }
 }
 
 fun e5QueryText(text: String): String = "query: $text"
