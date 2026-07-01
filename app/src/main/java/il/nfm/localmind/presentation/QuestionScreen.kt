@@ -43,6 +43,7 @@ private fun QuestionScreenContent(
         QuestionOutput(
             result = uiState.result,
             retrieved = uiState.retrieved,
+            errorMessage = uiState.errorMessage,
             modifier = Modifier.fillMaxWidth().weight(1f),
         )
     }
@@ -70,9 +71,11 @@ private fun QuestionOutput(
     result: String,
     modifier: Modifier = Modifier,
     retrieved: List<String> = emptyList(),
+    errorMessage: String? = null,
 ) {
     Column(modifier = modifier.verticalScroll(rememberScrollState())) {
         Text(text = "Retrieved: ${retrieved.joinToString(", ")}")
+        errorMessage?.let { Text(text = it) }
         Text(text = result)
     }
 }

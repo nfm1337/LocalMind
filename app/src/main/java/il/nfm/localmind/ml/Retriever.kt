@@ -1,6 +1,7 @@
 package il.nfm.localmind.ml
 
 import il.nfm.localmind.data.model.Note
+import il.nfm.localmind.data.model.RetrievedNote
 
 interface Retriever {
     suspend fun build(notes: List<Note>)
@@ -8,7 +9,7 @@ interface Retriever {
     suspend fun topK(
         query: String,
         k: Int = 5,
-    ): List<Note>
+    ): List<RetrievedNote>
 
     sealed interface State {
         data object Idle : State

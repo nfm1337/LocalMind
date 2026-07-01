@@ -1,11 +1,13 @@
 package il.nfm.localmind.presentation
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import il.nfm.localmind.ml.LLMEngine
 import il.nfm.localmind.ml.Retriever
 import il.nfm.localmind.ml.buildPrompt
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onCompletion
@@ -25,27 +27,60 @@ class QuestionViewModel
 
         init {
             viewModelScope.launch {
-                llmEngine.initialize()
+                initializeLlm()
             }
         }
 
+        @Suppress("TooGenericExceptionCaught")
         fun query(query: String) {
             _uiState.update {
                 it.copy(
                     query = query,
                     retrieved = emptyList(),
                     result = "",
+                    errorMessage = null,
                     isLoading = true,
                 )
             }
             viewModelScope.launch {
-                val notes = retriever.topK(query)
-                val prompt = buildPrompt(query, notes.map { it.content })
-                _uiState.update { state -> state.copy(retrieved = notes.map { it.title }) }
-                llmEngine
-                    .askOnce(prompt)
-                    .onCompletion { _uiState.update { it.copy(isLoading = false) } }
-                    .collect { token -> _uiState.update { it.copy(result = it.result + token) } }
+                try {
+                    val notes = retriever.topK(query)
+                    val prompt = buildPrompt(query, notes.map { it.note.content })
+                    _uiState.update { state -> state.copy(retrieved = notes.map { it.note.title }) }
+                    llmEngine
+                        .askOnce(prompt)
+                        .onCompletion { _uiState.update { it.copy(isLoading = false) } }
+                        .collect { token -> _uiState.update { it.copy(result = it.result + token) } }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to answer query", e)
+                    _uiState.update {
+                        it.copy(
+                            errorMessage = e.userMessage(),
+                            isLoading = false,
+                        )
+                    }
+                }
             }
+        }
+
+        @Suppress("TooGenericExceptionCaught")
+        private suspend fun initializeLlm() {
+            try {
+                llmEngine.initialize()
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to initialize LLM", e)
+                _uiState.update { it.copy(errorMessage = e.userMessage()) }
+            }
+        }
+
+        private fun Throwable.userMessage(): String =
+            message ?: "Model initialization failed. Check that models were pushed to the app."
+
+        private companion object {
+            const val TAG = "QuestionViewModel"
         }
     }

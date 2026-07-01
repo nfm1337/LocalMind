@@ -1,7 +1,7 @@
 package il.nfm.localmind.ml
 
-import android.util.Log
 import il.nfm.localmind.data.model.Note
+import il.nfm.localmind.data.model.RetrievedNote
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,16 +34,20 @@ class RetrieverImpl(
     override suspend fun topK(
         query: String,
         k: Int,
-    ): List<Note> {
-        val q = embedder.embedQuery(query)
-        index
-            .map { it.note.title to dot(q, it.vector) }
-            .sortedByDescending { it.second }
-            .forEach { Log.d("Retriever", "%.3f  %s".format(it.second, it.first)) }
+    ): List<RetrievedNote> {
+        require(k > 0) { "k must be positive, got $k" }
+        check(_state.value == Retriever.State.Ready) { "Retriever index is not ready: ${_state.value}" }
+
+        val queryVector = embedder.embedQuery(query)
+
         return index
-            .sortedByDescending { dot(q, it.vector) }
+            .map { embedded ->
+                RetrievedNote(
+                    note = embedded.note,
+                    score = dot(queryVector, embedded.vector),
+                )
+            }.sortedByDescending { it.score }
             .take(k)
-            .map { it.note }
     }
 
     private class EmbeddedNote(
