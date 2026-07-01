@@ -46,7 +46,14 @@ class QuestionViewModel
                 try {
                     val notes = retriever.topK(query)
                     val prompt = buildPrompt(query, notes.map { it.note.content })
-                    _uiState.update { state -> state.copy(retrieved = notes.map { it.note.title }) }
+                    _uiState.update { state ->
+                        state.copy(
+                            retrieved =
+                                notes.map {
+                                    RetrievedNoteUi(it.note.id, it.note.title, it.score)
+                                },
+                        )
+                    }
                     llmEngine
                         .askOnce(prompt)
                         .onCompletion { _uiState.update { it.copy(isLoading = false) } }

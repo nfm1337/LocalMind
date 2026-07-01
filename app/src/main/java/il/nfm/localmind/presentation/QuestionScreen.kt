@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import java.util.Locale
 
 @Composable
 fun QuestionScreen(viewModel: QuestionViewModel) {
@@ -70,12 +71,27 @@ private fun QuestionInput(
 private fun QuestionOutput(
     result: String,
     modifier: Modifier = Modifier,
-    retrieved: List<String> = emptyList(),
+    retrieved: List<RetrievedNoteUi> = emptyList(),
     errorMessage: String? = null,
 ) {
     Column(modifier = modifier.verticalScroll(rememberScrollState())) {
-        Text(text = "Retrieved: ${retrieved.joinToString(", ")}")
+        Text(text = retrieved.formatDebugText())
         errorMessage?.let { Text(text = it) }
         Text(text = result)
     }
 }
+
+private fun Float.formatScore(): String = "%.3f".format(Locale.US, this)
+
+private fun RetrievedNoteUi.formatDebugLine(): String = "$id ${score.formatScore()} $title"
+
+private fun List<RetrievedNoteUi>.formatDebugText(): String =
+    if (isEmpty()) {
+        "Retrieved: empty"
+    } else {
+        joinToString(
+            separator = "\n",
+            prefix = "Retrieved:\n",
+            transform = RetrievedNoteUi::formatDebugLine,
+        )
+    }
