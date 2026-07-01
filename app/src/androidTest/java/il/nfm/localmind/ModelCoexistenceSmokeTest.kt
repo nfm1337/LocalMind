@@ -64,12 +64,15 @@ class ModelCoexistenceSmokeTest {
                     llmEngine = checkNotNull(llmEngine),
                     embedder = checkNotNull(embedder),
                     appCommit = arguments.getString(ARG_APP_COMMIT) ?: "androidTest-run",
-                ).run(ProbeNotes.cases.first().query)
+                ).run(ProbeNotes.cases)
 
             Log.i(LOG_TAG, result.metrics.toCsvRow())
 
             assertEquals(PROBE_CSV_FIELD_COUNT, result.metrics.fieldCount())
             assertEquals("note_project", result.retrievedNote.id)
+            result.retrievalResults.forEach { retrieval ->
+                assertEquals(retrieval.case.expectedNoteId, retrieval.retrievedNote.id)
+            }
             assertEquals("pass", result.metrics.outcome)
             assertTrue(result.metrics.retrievedExpectedNote)
             assertTrue(result.metrics.answerUsesRetrievedNote)
@@ -87,7 +90,9 @@ class ModelCoexistenceSmokeTest {
         private val appCommit: String,
     ) {
         @Suppress("TooGenericExceptionCaught")
-        suspend fun run(query: String): ProbeRunResult {
+        suspend fun run(cases: List<ProbeCase>): ProbeRunResult {
+            require(cases.isNotEmpty()) { "At least one probe case is required" }
+
             var llmLoadMs = 0L
             var embedderLoadMetrics = EmbedderLoadMetrics(embedderLoadMs = 0L, tokenizerLoadMs = 0L)
             var pssLlmOnlyMb = 0L
@@ -109,15 +114,29 @@ class ModelCoexistenceSmokeTest {
                             EmbeddedProbeNote(note = note, vector = embedder.embedPassage(note.content))
                         }
                     }
-                val queryEmbedding = timed { embedder.embedQuery(query) }
-                val retrieval = timed { retrieveTopProbeNote(queryEmbedding.value, passageEmbedding.value) }
-                val generated = generate(query = query, retrievedNote = retrieval.value)
-                val expectedNoteId = ProbeNotes.expectedNoteIdFor(query)
-                val retrievedExpectedNote = expectedNoteId == null || expectedNoteId == retrieval.value.id
-                val answerUsesRetrievedNote = generated.answer.usesContentFrom(retrieval.value)
+                val retrievalResults =
+                    cases.map { case ->
+                        val queryEmbedding = timed { embedder.embedQuery(case.query) }
+                        val retrieval = timed { retrieveTopProbeNote(queryEmbedding.value, passageEmbedding.value) }
+                        ProbeRetrievalResult(
+                            case = case,
+                            retrievedNote = retrieval.value,
+                            queryEmbeddingMs = queryEmbedding.elapsedMs,
+                            retrievalMs = retrieval.elapsedMs,
+                        )
+                    }
+                val primaryRetrieval = retrievalResults.first()
+                val generated =
+                    generate(
+                        query = primaryRetrieval.case.query,
+                        retrievedNote = primaryRetrieval.retrievedNote,
+                    )
+                val retrievedExpectedNote = retrievalResults.all { it.case.expectedNoteId == it.retrievedNote.id }
+                val answerUsesRetrievedNote = generated.answer.usesContentFrom(primaryRetrieval.retrievedNote)
 
                 ProbeRunResult(
-                    retrievedNote = retrieval.value,
+                    retrievedNote = primaryRetrieval.retrievedNote,
+                    retrievalResults = retrievalResults,
                     answer = generated.answer,
                     metrics =
                         ProbeMetrics(
@@ -125,9 +144,9 @@ class ModelCoexistenceSmokeTest {
                             llmLoadMs = llmLoadMs,
                             embedderLoadMs = embedderLoadMetrics.embedderLoadMs,
                             tokenizerLoadMs = embedderLoadMetrics.tokenizerLoadMs,
-                            queryEmbeddingMs = queryEmbedding.elapsedMs,
+                            queryEmbeddingMs = primaryRetrieval.queryEmbeddingMs,
                             passageEmbedding10NotesMs = passageEmbedding.elapsedMs,
-                            retrievalMs = retrieval.elapsedMs,
+                            retrievalMs = primaryRetrieval.retrievalMs,
                             ttftMs = generated.ttftMs,
                             tokensPerSec = generated.tokensPerSec,
                             pssLlmOnlyMb = pssLlmOnlyMb,
@@ -139,12 +158,13 @@ class ModelCoexistenceSmokeTest {
                             outcome = if (retrievedExpectedNote && answerUsesRetrievedNote) "pass" else "fail",
                             notes =
                                 "pss_embedder_only_mb not isolated; " +
-                                    "LLM intentionally stayed resident before embedding",
+                                    "LLM intentionally stayed resident before embedding; " +
+                                    "retrieval_cases=${retrievalResults.size}",
                         ),
                 )
             } catch (oom: OutOfMemoryError) {
                 failureResult(
-                    query = query,
+                    query = cases.first().query,
                     llmLoadMs = llmLoadMs,
                     embedderLoadMetrics = embedderLoadMetrics,
                     pssLlmOnlyMb = pssLlmOnlyMb,
@@ -155,7 +175,7 @@ class ModelCoexistenceSmokeTest {
                 )
             } catch (failure: Exception) {
                 failureResult(
-                    query = query,
+                    query = cases.first().query,
                     llmLoadMs = llmLoadMs,
                     embedderLoadMetrics = embedderLoadMetrics,
                     pssLlmOnlyMb = pssLlmOnlyMb,
@@ -202,6 +222,7 @@ class ModelCoexistenceSmokeTest {
         ): ProbeRunResult =
             ProbeRunResult(
                 retrievedNote = ProbeNotes.notes.first(),
+                retrievalResults = emptyList(),
                 answer = "",
                 metrics =
                     ProbeMetrics(
@@ -258,6 +279,7 @@ class ModelCoexistenceSmokeTest {
 
     private data class ProbeRunResult(
         val retrievedNote: ProbeNote,
+        val retrievalResults: List<ProbeRetrievalResult>,
         val answer: String,
         val metrics: ProbeMetrics,
     )
@@ -270,6 +292,13 @@ class ModelCoexistenceSmokeTest {
     private data class ProbeCase(
         val query: String,
         val expectedNoteId: String,
+    )
+
+    private data class ProbeRetrievalResult(
+        val case: ProbeCase,
+        val retrievedNote: ProbeNote,
+        val queryEmbeddingMs: Long,
+        val retrievalMs: Long,
     )
 
     private data class EmbeddedProbeNote(
@@ -395,9 +424,9 @@ class ModelCoexistenceSmokeTest {
                 ProbeCase("What do I need to prove for LocalMind on the phone?", "note_project"),
                 ProbeCase("When is my dentist appointment?", "note_dentist"),
                 ProbeCase("What should I buy for Maya?", "note_birthday"),
+                ProbeCase("What ingredients go into the pasta sauce?", "note_recipe"),
+                ProbeCase("Where is my router admin page?", "note_wifi"),
             )
-
-        fun expectedNoteIdFor(query: String): String? = cases.firstOrNull { it.query == query }?.expectedNoteId
     }
 
     private object ProbeMemory {
