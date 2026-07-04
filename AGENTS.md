@@ -15,6 +15,10 @@ Read these files first when changing product behavior or architecture:
 - `docs/plan.md`
 - `docs/architecture.md`
 
+Also read and follow `docs/agent-collaboration.md` for the project-specific
+pair-programming and review workflow before changing product behavior,
+architecture, scope, or implementation.
+
 ## Repository Layout
 
 - `app/` - Android application module.

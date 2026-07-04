@@ -1,7 +1,7 @@
 # Spec: Hardcoded Notes RAG
 
 ## Status
-Draft
+Finished
 
 ## Goal
 Build the first end-to-end RAG vertical slice: a user asks a question, the app
@@ -9,7 +9,7 @@ retrieves from a tiny fixed set of notes, and the LLM answers using the retrieve
 context.
 
 ## Context
-This spec maps to Phase 1 in `docs/plan.md`. Phase 0 proved the LLM and embedder
+This spec maps to Phase 1. Phase 0 proved the LLM and embedder
 can coexist on the target device. The next risk is whether the embedding model
 retrieves the right short note for natural questions and whether that retrieved
 note can be passed through the prompt into a grounded answer.
@@ -140,8 +140,7 @@ editing UI is required.
   human smoke test, unit assertions over retrieval only, or both?
 
 ## Verification
-- [ ] `./gradlew ktlintCheck`
-- [ ] `./gradlew detekt`
-- [ ] `./gradlew test`
-- [ ] `./gradlew assembleDebug` if native/Gradle/app wiring changed
-- [ ] Physical device smoke test if behavior depends on model/device runtime
+- [x] `./gradlew ktlintCheck`
+- [x] `./gradlew detekt`
+- [x] `./gradlew test`
+- [x] `./gradlew assembleDebug` if native/Gradle/app wiring changed

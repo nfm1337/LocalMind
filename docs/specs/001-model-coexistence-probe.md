@@ -1,7 +1,7 @@
 # Spec: Model Coexistence Probe
 
 ## Status
-Finished
+Finished (historical evidence)
 
 ## Goal
 Prove that LLM and embedding models can be loaded together and each run on a
