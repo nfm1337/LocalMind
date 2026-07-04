@@ -1,8 +1,11 @@
 package il.nfm.localmind.ml
 
 import il.nfm.localmind.data.model.Note
+import kotlinx.coroutines.flow.StateFlow
 
 interface Retriever {
+    val state: StateFlow<State>
+
     suspend fun build(notes: List<Note>)
 
     suspend fun topK(

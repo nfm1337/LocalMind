@@ -3,6 +3,7 @@ package il.nfm.localmind.ml
 import il.nfm.localmind.data.model.Note
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlin.time.TimeSource
 
@@ -10,7 +11,7 @@ class RetrieverImpl(
     private val embedder: Embedder,
 ) : Retriever {
     private val _state = MutableStateFlow<Retriever.State>(Retriever.State.Idle)
-    val state = _state.asStateFlow()
+    override val state: StateFlow<Retriever.State> = _state.asStateFlow()
 
     @Volatile
     private var index: List<EmbeddedNote> = emptyList()
