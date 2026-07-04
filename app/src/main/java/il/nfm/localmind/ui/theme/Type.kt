@@ -30,7 +30,6 @@ val LocalMindTypography =
                 fontWeight = FontWeight.Normal,
                 fontSize = 30.sp,
                 lineHeight = 36.sp,
-                letterSpacing = 0.sp,
             ),
         // Headlines
         headlineMedium =
@@ -39,7 +38,6 @@ val LocalMindTypography =
                 fontWeight = FontWeight.Bold,
                 fontSize = 30.sp,
                 lineHeight = 36.sp,
-                letterSpacing = 0.sp,
             ),
         // board / brand title
         headlineSmall =
@@ -48,7 +46,6 @@ val LocalMindTypography =
                 fontWeight = FontWeight.Medium,
                 fontSize = 25.sp,
                 lineHeight = 30.sp,
-                letterSpacing = 0.sp,
             ),
         // note editor title
         // Titles
@@ -58,7 +55,6 @@ val LocalMindTypography =
                 fontWeight = FontWeight.Medium,
                 fontSize = 22.sp,
                 lineHeight = 28.sp,
-                letterSpacing = 0.sp,
             ),
         // top app bar title
         titleMedium =
@@ -67,7 +63,6 @@ val LocalMindTypography =
                 fontWeight = FontWeight.Medium,
                 fontSize = 16.sp,
                 lineHeight = 22.sp,
-                letterSpacing = 0.sp,
             ),
         // note card title, question text
         titleSmall =
@@ -76,7 +71,6 @@ val LocalMindTypography =
                 fontWeight = FontWeight.Medium,
                 fontSize = 14.sp,
                 lineHeight = 20.sp,
-                letterSpacing = 0.sp,
             ),
         // card section headers
         // Body
@@ -86,7 +80,6 @@ val LocalMindTypography =
                 fontWeight = FontWeight.Normal,
                 fontSize = 15.sp,
                 lineHeight = 24.sp,
-                letterSpacing = 0.sp,
             ),
         // editor content, answer text, input placeholder
         bodyMedium =
@@ -95,7 +88,6 @@ val LocalMindTypography =
                 fontWeight = FontWeight.Normal,
                 fontSize = 14.sp,
                 lineHeight = 20.sp,
-                letterSpacing = 0.sp,
             ),
         // card snippet / secondary body
         bodySmall =
@@ -104,7 +96,6 @@ val LocalMindTypography =
                 fontWeight = FontWeight.Normal,
                 fontSize = 12.sp,
                 lineHeight = 16.sp,
-                letterSpacing = 0.sp,
             ),
         // privacy chip text, captions
         // Labels
@@ -114,7 +105,6 @@ val LocalMindTypography =
                 fontWeight = FontWeight.Medium,
                 fontSize = 14.sp,
                 lineHeight = 20.sp,
-                letterSpacing = 0.sp,
             ),
         // buttons
         labelMedium =
@@ -123,7 +113,6 @@ val LocalMindTypography =
                 fontWeight = FontWeight.Medium,
                 fontSize = 12.sp,
                 lineHeight = 16.sp,
-                letterSpacing = 0.sp,
             ),
         // nav labels, category tags, chips
         labelSmall =
@@ -132,7 +121,6 @@ val LocalMindTypography =
                 fontWeight = FontWeight.Medium,
                 fontSize = 11.sp,
                 lineHeight = 16.sp,
-                letterSpacing = 0.sp,
             ),
         // tiny tags / score labels
     )
