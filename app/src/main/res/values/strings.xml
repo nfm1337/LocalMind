@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">LocalMind</string>
     <string name="note_untitled_title">Untitled</string>
+    <string name="notes_list_navigation_label">Notes</string>
+    <string name="notes_list_empty_title">No notes yet</string>
+    <string name="notes_list_empty_body">Create a note to start building your local memory.</string>
+    <string name="ask_ai_navigation_label">Ask</string>
+    <string name="diagnostics_navigation_label">Diagnostics</string>
 </resources>

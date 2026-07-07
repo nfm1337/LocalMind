@@ -58,10 +58,17 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.compose.material.icons)
 
     implementation(libs.litert.lm)
     implementation(libs.onnxruntime)
+
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.material3.adaptive.navigation3)
+
+    implementation(libs.androidx.hilt.viewmodel)
 
     implementation(libs.hilt.core)
     ksp(libs.hilt.compiler)
