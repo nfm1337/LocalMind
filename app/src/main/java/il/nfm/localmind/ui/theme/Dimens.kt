@@ -70,6 +70,8 @@ object Dimens {
     // App icon
     val appIconLarge = 46.dp
     val appIconSmall = 30.dp
+
+    val stripedBox = 112.dp
 }
 
 // -- Elevation --------------------------------------------------------------

@@ -1,5 +1,6 @@
 package il.nfm.localmind.core.presentation
 
+import android.content.Context
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
@@ -20,4 +21,10 @@ fun UiText.asString(): String =
     when (this) {
         is UiText.DynamicString -> value
         is UiText.StringResource -> stringResource(id, *args.toTypedArray())
+    }
+
+fun UiText.asString(context: Context): String =
+    when (this) {
+        is UiText.DynamicString -> value
+        is UiText.StringResource -> context.getString(id, *args.toTypedArray())
     }

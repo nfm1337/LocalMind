@@ -5,9 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed interface Route : NavKey {
-    val showBottomBar: Boolean
-        get() = true
-
     @Serializable
     data object NotesList : Route
 
@@ -19,13 +16,8 @@ sealed interface Route : NavKey {
 
     @Serializable
     data class NoteDetails(
-        val id: String,
-    ) : Route {
-        override val showBottomBar: Boolean = false
-    }
+        val id: String?,
+    ) : Route
 }
-
-val Route?.shouldShowBottomBar: Boolean
-    get() = this?.showBottomBar == true
 
 fun NavKey?.asRoute(): Route? = this as? Route

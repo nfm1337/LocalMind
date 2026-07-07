@@ -4,7 +4,9 @@ import il.nfm.localmind.core.model.UserNote
 import il.nfm.localmind.feature.notes.domain.NotesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.util.UUID
 import javax.inject.Inject
+import kotlin.time.Clock
 
 class NotesRepositoryImpl
     @Inject
@@ -20,6 +22,20 @@ class NotesRepositoryImpl
 
         override fun getNoteById(id: String): Flow<UserNote?> =
             notesDao.observeNoteById(id).map { dbModel -> dbModel?.toDomainModel() }
+
+        override suspend fun createNote(): String {
+            val note =
+                UserNote(
+                    id = UUID.randomUUID().toString(),
+                    title = "",
+                    content = "",
+                    createdAt = Clock.System.now(),
+                    updatedAt = Clock.System.now(),
+                )
+            notesDao.upsertNote(note.toDbModel())
+
+            return note.id
+        }
 
         override suspend fun upsertNote(note: UserNote) {
             val dbModel = note.toDbModel()

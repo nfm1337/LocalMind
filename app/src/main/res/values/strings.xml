@@ -3,7 +3,11 @@
     <string name="note_untitled_title">Untitled</string>
     <string name="notes_list_navigation_label">Notes</string>
     <string name="notes_list_empty_title">No notes yet</string>
-    <string name="notes_list_empty_body">Create a note to start building your local memory.</string>
+    <string name="notes_list_empty_body">Create your first note. It’s indexed locally so you can search and ask questions — completely offline.</string>
     <string name="ask_ai_navigation_label">Ask</string>
     <string name="diagnostics_navigation_label">Diagnostics</string>
+    <string name="notes_create_note">Create note</string>
+    <string name="no_connection_statement">Works with no connection</string>
+    <string name="new_note">New note</string>
+    <string name="note_create_failed">Failed to create note</string>
 </resources>

@@ -31,6 +31,8 @@ data class ExtendedColors(
     val privacyAccent: Color,
     val privacyContainer: Color,
     val onPrivacyContainer: Color,
+    val brandLogoContainer: Color,
+    val onBrandLogo: Color,
 )
 
 val LightLocalMindColors =
@@ -48,6 +50,8 @@ val LightLocalMindColors =
         privacyAccent = Color(0xFF38614F),
         privacyContainer = Color(0xFFCFE8DC),
         onPrivacyContainer = Color(0xFF00201A),
+        brandLogoContainer = Color(0xFF38614F),
+        onBrandLogo = Color(0xFFFFFFFF),
     )
 
 val DarkLocalMindColors =
@@ -65,5 +69,7 @@ val DarkLocalMindColors =
         privacyAccent = Color(0xFF9FD5BF),
         privacyContainer = Color(0xFF1F4A3C),
         onPrivacyContainer = Color(0xFFBBF0DB),
+        brandLogoContainer = Color(0xFF38614F),
+        onBrandLogo = Color(0xFFFFFFFF),
     )
 val LocalLocalMindColors = staticCompositionLocalOf { LightLocalMindColors }

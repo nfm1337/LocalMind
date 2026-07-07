@@ -8,6 +8,8 @@ interface NotesRepository {
 
     fun getNoteById(id: String): Flow<UserNote?>
 
+    suspend fun createNote(): String
+
     suspend fun upsertNote(note: UserNote)
 
     suspend fun deleteNoteById(id: String)
