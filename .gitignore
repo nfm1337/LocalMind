@@ -12,6 +12,7 @@ local.properties
 
 # Log/OS Files
 *.log
+.Ds_store
 
 # Android Studio generated files and folders
 captures/
