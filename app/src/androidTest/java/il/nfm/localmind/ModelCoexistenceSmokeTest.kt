@@ -3,7 +3,6 @@ package il.nfm.localmind
 import android.os.Build
 import android.os.Debug
 import android.os.SystemClock
-import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import il.nfm.localmind.ml.DebugModelPathProvider
@@ -23,6 +22,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
+import timber.log.Timber
 import java.io.File
 import java.time.Instant
 import java.util.Locale
@@ -66,7 +66,7 @@ class ModelCoexistenceSmokeTest {
                     appCommit = arguments.getString(ARG_APP_COMMIT) ?: "androidTest-run",
                 ).run(ProbeNotes.cases)
 
-            Log.i(LOG_TAG, result.metrics.toCsvRow())
+            Timber.tag(LOG_TAG).i(result.metrics.toCsvRow())
 
             assertEquals(PROBE_CSV_FIELD_COUNT, result.metrics.fieldCount())
             assertEquals("note_project", result.retrievedNote.id)

@@ -1,6 +1,5 @@
 package il.nfm.localmind.presentation
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -13,6 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -46,8 +46,10 @@ class QuestionViewModel
                 try {
                     val retrieval = retriever.topK(query)
 
-                    Log.d(RETRIEVAL_METRICS_TAG, "queryEmbeddingMs: ${retrieval.metrics.queryEmbeddingMs}")
-                    Log.d(RETRIEVAL_METRICS_TAG, "retrievalMs: ${retrieval.metrics.retrievalMs}")
+                    Timber.tag(RETRIEVAL_METRICS_TAG).d(
+                        "queryEmbeddingMs: ${retrieval.metrics.queryEmbeddingMs}",
+                    )
+                    Timber.tag(RETRIEVAL_METRICS_TAG).d("retrievalMs: ${retrieval.metrics.retrievalMs}")
 
                     val notes = retrieval.results
 
@@ -68,7 +70,7 @@ class QuestionViewModel
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
-                    Log.e(TAG, "Failed to answer query", e)
+                    Timber.tag(TAG).e(e, "Failed to answer query")
                     _uiState.update {
                         it.copy(
                             errorMessage = e.userMessage(),
@@ -86,7 +88,7 @@ class QuestionViewModel
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to initialize LLM", e)
+                Timber.tag(TAG).e(e, "Failed to initialize LLM")
                 _uiState.update { it.copy(errorMessage = e.userMessage()) }
             }
         }

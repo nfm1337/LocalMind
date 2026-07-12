@@ -1,7 +1,6 @@
 package il.nfm.localmind.di
 
 import android.content.Context
-import android.util.Log
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -18,6 +17,7 @@ import il.nfm.localmind.ml.Retriever
 import il.nfm.localmind.ml.RetrieverImpl
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Singleton
 
 @Module
@@ -51,11 +51,11 @@ object ModelModule {
     ): Retriever {
         val retriever = RetrieverImpl(embedder)
         appScope.launch {
-            retriever.state.collect { Log.d("Retriever", "state: $it") }
+            retriever.state.collect { Timber.tag("Retriever").d("state: $it") }
         }
         appScope.launch {
             runCatching { retriever.build(context.assets.loadNotes()) }
-                .onFailure { Log.e("Retriever", "Failed to build note index", it) }
+                .onFailure { error -> Timber.tag("Retriever").e(error, "Failed to build note index") }
         }
         return retriever
     }
