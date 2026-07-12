@@ -43,4 +43,9 @@ class NotesRepositoryImpl
         }
 
         override suspend fun deleteNoteById(id: String) = notesDao.deleteNoteById(id)
+
+        override suspend fun deleteNotesByIds(noteIds: Collection<String>) {
+            if (noteIds.isEmpty()) return
+            notesDao.deleteNotesByIds(noteIds)
+        }
     }

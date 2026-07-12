@@ -1,6 +1,14 @@
 package il.nfm.localmind.feature.notes.presentation.list
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,13 +23,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.CloudOff
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -34,6 +46,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -56,7 +69,10 @@ import kotlin.math.hypot
 fun NotesListScreen(
     uiState: NotesListUiState,
     onNoteClick: (String) -> Unit,
+    onToggleNoteSelection: (String) -> Unit,
     onNewNoteClick: () -> Unit,
+    onClearSelection: () -> Unit,
+    onDeleteSelection: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -64,10 +80,14 @@ fun NotesListScreen(
     ) {
         NotesListTopBar(
             modifier = Modifier.fillMaxWidth(),
+            selectedCount = uiState.selectedCount,
+            onClearSelection = onClearSelection,
+            onDeleteSelection = onDeleteSelection,
         )
         NotesListContent(
             uiState = uiState,
             onNoteClick = onNoteClick,
+            onToggleNoteSelection = onToggleNoteSelection,
             onNewNoteClick = onNewNoteClick,
             modifier = Modifier.fillMaxSize(),
         )
@@ -78,6 +98,7 @@ fun NotesListScreen(
 private fun NotesListContent(
     uiState: NotesListUiState,
     onNoteClick: (String) -> Unit,
+    onToggleNoteSelection: (String) -> Unit,
     onNewNoteClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -94,7 +115,9 @@ private fun NotesListContent(
     } else {
         PopulatedNotesList(
             notes = uiState.notes,
+            selectedNoteIds = uiState.selectedNoteIds,
             onNoteClick = onNoteClick,
+            onToggleNoteSelection = onToggleNoteSelection,
             onNewNoteClick = onNewNoteClick,
             modifier = modifier,
         )
@@ -104,7 +127,9 @@ private fun NotesListContent(
 @Composable
 private fun PopulatedNotesList(
     notes: List<NoteUi>,
+    selectedNoteIds: Set<String>,
     onNoteClick: (String) -> Unit,
+    onToggleNoteSelection: (String) -> Unit,
     onNewNoteClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -122,7 +147,15 @@ private fun PopulatedNotesList(
             ) { note ->
                 NoteListItem(
                     note = note,
-                    onClick = { onNoteClick(note.id) },
+                    selected = note.id in selectedNoteIds,
+                    onClick = {
+                        if (selectedNoteIds.isNotEmpty()) {
+                            onToggleNoteSelection(note.id)
+                        } else {
+                            onNoteClick(note.id)
+                        }
+                    },
+                    onLongClick = { onToggleNoteSelection(note.id) },
                 )
             }
         }
@@ -270,15 +303,36 @@ private fun OfflineStatement(modifier: Modifier = Modifier) {
 @Composable
 private fun NoteListItem(
     note: NoteUi,
+    selected: Boolean,
     onClick: () -> Unit,
+    onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Card(
         modifier =
             modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .combinedClickable(
+                    onClick = onClick,
+                    onLongClick = onLongClick,
+                    onLongClickLabel = "Select note",
+                ),
         shape = MaterialTheme.shapes.medium,
-        onClick = onClick,
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    if (selected) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceContainer
+                    },
+            ),
+        border =
+            if (selected) {
+                BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+            } else {
+                null
+            },
     ) {
         Column(modifier = Modifier.padding(LocalSpacing.current.lg)) {
             Row(
@@ -353,9 +407,74 @@ private fun StripedRoundedBox(modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun NotesListTopBar(modifier: Modifier = Modifier) {
-    TopAppBar(
+private fun NotesListTopBar(
+    selectedCount: Int,
+    onClearSelection: () -> Unit,
+    onDeleteSelection: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    AnimatedContent(
+        targetState = selectedCount > 0,
         modifier = modifier,
+        label = "Notes top bar state",
+        transitionSpec = @Suppress("MagicNumber") {
+            fadeIn() + slideInVertically { -it / 3 } togetherWith
+                fadeOut() + slideOutVertically { -it / 3 }
+        },
+    ) { isSelectionMode ->
+        if (isSelectionMode) {
+            NotesSelectionTopBar(
+                selectedCount = selectedCount,
+                onClearSelection = onClearSelection,
+                onDeleteSelection = onDeleteSelection,
+            )
+        } else {
+            NotesDefaultTopBar()
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NotesSelectionTopBar(
+    selectedCount: Int,
+    onClearSelection: () -> Unit,
+    onDeleteSelection: () -> Unit,
+) {
+    TopAppBar(
+        title = {
+            Text(
+                text =
+                    pluralStringResource(
+                        id = R.plurals.notes_selected_count,
+                        count = selectedCount,
+                        selectedCount,
+                    ),
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = onClearSelection) {
+                Icon(
+                    imageVector = Icons.Outlined.Close,
+                    contentDescription = stringResource(R.string.cancel_notes_selection),
+                )
+            }
+        },
+        actions = {
+            IconButton(onClick = onDeleteSelection) {
+                Icon(
+                    imageVector = Icons.Outlined.Delete,
+                    contentDescription = stringResource(R.string.delete_notes_action),
+                )
+            }
+        },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NotesDefaultTopBar() {
+    TopAppBar(
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 AppIcon(
@@ -382,6 +501,9 @@ private fun NotesListScreenEmptyPreview() {
             uiState = NotesListUiState(),
             onNoteClick = {},
             onNewNoteClick = {},
+            onDeleteSelection = {},
+            onClearSelection = {},
+            onToggleNoteSelection = {},
         )
     }
 }
@@ -394,6 +516,9 @@ private fun NotesListScreenEmptyDarkPreview() {
             uiState = NotesListUiState(),
             onNoteClick = {},
             onNewNoteClick = {},
+            onDeleteSelection = {},
+            onClearSelection = {},
+            onToggleNoteSelection = {},
         )
     }
 }
@@ -406,6 +531,9 @@ private fun NotesListScreenPreview() {
             uiState = previewNotesListUiState(),
             onNoteClick = {},
             onNewNoteClick = {},
+            onDeleteSelection = {},
+            onClearSelection = {},
+            onToggleNoteSelection = {},
         )
     }
 }
@@ -415,9 +543,12 @@ private fun NotesListScreenPreview() {
 private fun NotesListScreenDarkPreview() {
     LocalMindTheme(darkTheme = true) {
         NotesListScreen(
-            uiState = previewNotesListUiState(),
+            uiState = previewNotesListUiState().copy(selectedNoteIds = setOf("1", "2")),
             onNoteClick = {},
             onNewNoteClick = {},
+            onDeleteSelection = {},
+            onClearSelection = {},
+            onToggleNoteSelection = {},
         )
     }
 }

@@ -13,4 +13,6 @@ interface NotesRepository {
     suspend fun upsertNote(note: UserNote)
 
     suspend fun deleteNoteById(id: String)
+
+    suspend fun deleteNotesByIds(noteIds: Collection<String>)
 }

@@ -6,9 +6,12 @@ data class NotesListUiState(
     val notes: List<NoteUi> = emptyList(),
     val indexingState: IndexingState = IndexingState.Indexed,
     val searchQuery: String = "",
+    val selectedNoteIds: Set<String> = emptySet(),
 ) {
     val notesCount: Int
         get() = notes.size
+    val selectedCount: Int get() = selectedNoteIds.size
+    val isSelectionMode: Boolean get() = selectedNoteIds.isNotEmpty()
 }
 
 @Immutable

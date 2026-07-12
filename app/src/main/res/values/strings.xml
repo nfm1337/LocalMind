@@ -10,4 +10,15 @@
     <string name="no_connection_statement">Works with no connection</string>
     <string name="new_note">New note</string>
     <string name="note_create_failed">Failed to create note</string>
+    <string name="notes_deletion_error">Failed to delete notes</string>
+    <string name="delete_notes_action">Delete selected notes</string>
+    <string name="cancel_notes_selection">Cancel notes selection</string>
+    <plurals name="notes_deleted_count">
+        <item quantity="one">1 note deleted</item>
+        <item quantity="other">%d notes deleted</item>
+    </plurals>
+    <plurals name="notes_selected_count">
+        <item quantity="one">%d note selected</item>
+        <item quantity="other">%d notes selected</item>
+    </plurals>
 </resources>

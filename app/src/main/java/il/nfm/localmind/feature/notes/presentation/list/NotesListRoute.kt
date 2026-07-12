@@ -31,7 +31,10 @@ fun NotesListRoute(
     NotesListScreen(
         uiState = uiState,
         onNoteClick = onNoteClick,
+        onToggleNoteSelection = viewModel::toggleNoteSelection,
         onNewNoteClick = onNewNoteClick,
+        onClearSelection = viewModel::clearSelection,
+        onDeleteSelection = viewModel::deleteSelection,
         modifier = modifier,
     )
 }
