@@ -3,17 +3,14 @@ package il.nfm.localmind.feature.notes.presentation.list
 import app.cash.turbine.test
 import il.nfm.localmind.MainDispatcherRule
 import il.nfm.localmind.R
-import il.nfm.localmind.core.model.UserNote
 import il.nfm.localmind.core.presentation.UiText
-import il.nfm.localmind.feature.notes.domain.NotesRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
+import il.nfm.localmind.feature.notes.FakeNotesRepository
+import il.nfm.localmind.feature.notes.presentation.userNote
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertEquals
-import kotlin.time.Instant
 
 class NotesListViewModelTest {
     @get:Rule
@@ -150,7 +147,7 @@ class NotesListViewModelTest {
                 viewModel.deleteSelection()
 
                 awaitItem()
-                assertEquals(listOf("note-1", "note-2"), repository.deletedIds)
+                assertEquals(listOf("note-1", "note-2"), repository.deletedNoteIds)
             }
         }
 
@@ -202,7 +199,7 @@ class NotesListViewModelTest {
             viewModel.events.test {
                 viewModel.deleteSelection()
 
-                assertEquals(emptyList(), repository.deletedIds)
+                assertEquals(emptyList(), repository.deletedNoteIds)
                 expectNoEvents()
             }
         }
@@ -247,40 +244,3 @@ class NotesListViewModelTest {
             }
         }
 }
-
-private class FakeNotesRepository : NotesRepository {
-    val notes = MutableStateFlow<List<UserNote>>(emptyList())
-    val deletedIds = mutableListOf<String>()
-    var shouldFailDelete = false
-
-    override fun observeNotes(): Flow<List<UserNote>> = notes
-
-    override fun getNoteById(id: String): Flow<UserNote?> = MutableStateFlow(notes.value.firstOrNull { it.id == id })
-
-    override suspend fun createNote(): String = "new-note-id"
-
-    override suspend fun upsertNote(note: UserNote) = Unit
-
-    override suspend fun deleteNoteById(id: String) {
-        if (shouldFailDelete) error("Delete failed")
-        deletedIds += id
-    }
-
-    override suspend fun deleteNotesByIds(noteIds: Collection<String>) {
-        if (shouldFailDelete) error("Delete failed")
-        deletedIds += noteIds
-    }
-}
-
-private fun userNote(
-    id: String,
-    title: String = "Title",
-    content: String = "Content",
-): UserNote =
-    UserNote(
-        id = id,
-        title = title,
-        content = content,
-        createdAt = Instant.parse("2026-07-10T10:00:00Z"),
-        updatedAt = Instant.parse("2026-07-10T10:00:00Z"),
-    )

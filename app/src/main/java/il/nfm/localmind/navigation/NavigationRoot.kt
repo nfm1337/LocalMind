@@ -19,6 +19,7 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import il.nfm.localmind.core.presentation.asString
+import il.nfm.localmind.feature.notes.presentation.details.NoteDetailsRoute
 import il.nfm.localmind.feature.notes.presentation.list.NotesListRoute
 import kotlinx.coroutines.launch
 
@@ -84,8 +85,15 @@ fun NavigationRoot(modifier: Modifier = Modifier) {
                         Text("Diagnostics")
                     }
                     entry<Route.NoteDetails> { key ->
-                        Text(
-                            text = "Note ${key.id}",
+                        NoteDetailsRoute(
+                            noteId = key.id,
+                            onBackClick = { backStack.removeLastOrNull() },
+                            onSnackBarMessage = { message ->
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(message.asString(context))
+                                }
+                            },
+                            modifier = Modifier.fillMaxSize(),
                         )
                     }
                 },

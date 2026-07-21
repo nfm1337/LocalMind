@@ -8,7 +8,10 @@ interface NotesRepository {
 
     fun getNoteById(id: String): Flow<UserNote?>
 
-    suspend fun createNote(): String
+    suspend fun createNote(
+        title: String,
+        content: String,
+    ): UserNote
 
     suspend fun upsertNote(note: UserNote)
 

@@ -13,6 +13,7 @@
     <string name="notes_deletion_error">Failed to delete notes</string>
     <string name="delete_notes_action">Delete selected notes</string>
     <string name="cancel_notes_selection">Cancel notes selection</string>
+    <string name="error_failed_to_save_note">Failed to save note</string>
     <plurals name="notes_deleted_count">
         <item quantity="one">1 note deleted</item>
         <item quantity="other">%d notes deleted</item>

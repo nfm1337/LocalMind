@@ -23,18 +23,22 @@ class NotesRepositoryImpl
         override fun getNoteById(id: String): Flow<UserNote?> =
             notesDao.observeNoteById(id).map { dbModel -> dbModel?.toDomainModel() }
 
-        override suspend fun createNote(): String {
+        override suspend fun createNote(
+            title: String,
+            content: String,
+        ): UserNote {
+            val now = Clock.System.now()
             val note =
                 UserNote(
                     id = UUID.randomUUID().toString(),
-                    title = "",
-                    content = "",
-                    createdAt = Clock.System.now(),
-                    updatedAt = Clock.System.now(),
+                    title = title,
+                    content = content,
+                    createdAt = now,
+                    updatedAt = now,
                 )
             notesDao.upsertNote(note.toDbModel())
 
-            return note.id
+            return note
         }
 
         override suspend fun upsertNote(note: UserNote) {
